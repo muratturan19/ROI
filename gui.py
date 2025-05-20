@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QGroupBox,
     QStyle,
+    QCheckBox,
 )
 from PyQt5.QtGui import QFont, QIcon, QDoubleValidator
 from PyQt5.QtCore import Qt
@@ -21,6 +22,7 @@ from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.chart import BarChart, Reference
 from data_templates import ozet_roi_data, maliyet_tasarrufu_data, verimlilik_artisi_data, kalite_iyilestirme_data, npv_roi_bilgi_data
 from calculations import maliyet_tasarrufu_hesapla, verimlilik_artisi_hesapla, kalite_iyilestirme_hesapla, roi_hesapla
+from xlsx_report import create_xlsxwriter_report
 
 class ROIHesaplamaArayuzu(QMainWindow):
     """Main window providing forms to collect ROI parameters."""
@@ -53,11 +55,16 @@ class ROIHesaplamaArayuzu(QMainWindow):
         self.tab_widget = QTabWidget()
         layout.addWidget(self.tab_widget)
 
+
         # Sayfaları Oluştur
         self.sirket_bilgileri_sayfasi()
         self.maliyet_tasarrufu_sayfasi()
         self.verimlilik_sayfasi()
         self.kalite_sayfasi()
+
+        # Gelişmiş rapor seçeneği
+        self.use_xlsxwriter = QCheckBox("Gelişmiş Excel Raporu (xlsxwriter)")
+        layout.addWidget(self.use_xlsxwriter)
 
         # Hesapla Butonu
         hesapla_btn = QPushButton('ROI Hesapla')
@@ -269,6 +276,43 @@ class ROIHesaplamaArayuzu(QMainWindow):
             # Tüm input alanlarından verileri al
             sirket_adi = self.sirket_adi.text() or "Bilinmeyen Şirket"
             proje_adi = self.proje_adi.text() or "Isimsiz Proje"
+
+            data = {
+                "sirket_adi": sirket_adi,
+                "proje_adi": proje_adi,
+                "mevcut_isci_sayisi": self._to_float(self.mevcut_isci_sayisi),
+                "ortalama_maas": self._to_float(self.ortalama_maas),
+                "mevcut_vardiya_sayisi": self._to_float(self.mevcut_vardiya_sayisi),
+                "otomasyon_sonrasi_isci_sayisi": self._to_float(self.otomasyon_sonrasi_isci_sayisi),
+                "otomasyon_sonrasi_maas": self._to_float(self.otomasyon_sonrasi_maas),
+                "otomasyon_sonrasi_vardiya_sayisi": self._to_float(self.otomasyon_sonrasi_vardiya_sayisi),
+                "max_kapasite": self._to_float(self.max_kapasite),
+                "oee_mevcut": self._to_float(self.oee_mevcut),
+                "calisma_gunu": self._to_float(self.calisma_gunu),
+                "otomasyon_sonrasi_max_kapasite": self._to_float(self.otomasyon_sonrasi_max_kapasite),
+                "otomasyon_sonrasi_oee": self._to_float(self.otomasyon_sonrasi_oee),
+                "otomasyon_sonrasi_calisma_gunu": self._to_float(self.otomasyon_sonrasi_calisma_gunu),
+                "birim_urun_fiyati": self._to_float(self.birim_urun_fiyati),
+                "iade_urun_sayisi": self._to_float(self.iade_urun_sayisi),
+                "ortalama_iade_maliyeti": self._to_float(self.ortalama_iade_maliyeti),
+                "musteri_sikayet_sayisi": self._to_float(self.musteri_sikayet_sayisi),
+                "ortalama_sikayet_maliyeti": self._to_float(self.ortalama_sikayet_maliyeti),
+                "otomasyon_sonrasi_iade_urun_sayisi": self._to_float(self.otomasyon_sonrasi_iade_urun_sayisi),
+                "otomasyon_sonrasi_iade_maliyeti": self._to_float(self.otomasyon_sonrasi_iade_maliyeti),
+                "otomasyon_sonrasi_sikayet_sayisi": self._to_float(self.otomasyon_sonrasi_sikayet_sayisi),
+                "otomasyon_sonrasi_sikayet_maliyeti": self._to_float(self.otomasyon_sonrasi_sikayet_maliyeti),
+            }
+
+            dosya_adi = f"{sirket_adi}_{proje_adi}_ROI_Raporu_{datetime.now().strftime('%Y%m%d')}.xlsx"
+
+            if self.use_xlsxwriter.isChecked():
+                create_xlsxwriter_report(data, dosya_adi)
+                QMessageBox.information(
+                    self,
+                    "Başarılı",
+                    f"Gelişmiş ROI Raporu {dosya_adi} olarak kaydedildi!",
+                )
+                return
 
             # Excel oluşturma
             wb = openpyxl.Workbook()
