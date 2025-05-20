@@ -129,5 +129,19 @@ def grafik_ekle_xlsxwriter(workbook):
     chart2.set_size({'width': 350, 'height': 250})
     ozet_sayfasi.insert_chart('H20', chart2)  # H20’ye yerleştir
 
+    # 3. Grafik: Bugünkü Değerlerin Eğilimi (Line Chart)
+    chart3 = workbook.add_chart({'type': 'line'})
+    chart3.add_series({
+        'name': 'Bugünkü Değer',
+        'categories': ['4-Özet ve ROI', 3, 3, 7, 3],  # D4:D8 yıllar
+        'values': ['4-Özet ve ROI', 3, 5, 7, 5],      # F4:F8 bugünkü değerler
+        'line': {'color': '#C0504D'},
+    })
+    chart3.set_title({'name': 'NPV Eğilimi'})
+    chart3.set_x_axis({'name': 'Yıl'})
+    chart3.set_y_axis({'name': 'Bugünkü Değer (TL)'})
+    chart3.set_size({'width': 350, 'height': 250})
+    ozet_sayfasi.insert_chart('H36', chart3)
+
 def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
     pass
