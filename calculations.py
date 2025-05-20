@@ -66,21 +66,19 @@ def roi_hesapla(ozet_sayfasi, wb):
 
     # Toplam yatırım maliyeti (B5:B9)
     toplam_yatirim = sum(ozet_sayfasi[f"B{i}"].value or 0 for i in range(5, 10))
-    ozet_sayfasi["B11"].value = toplam_yatirim
+    # B11 hücresi formül içerdiğinden değeri doğrudan yazmayız
 
     # Yıllık getiriler
     maliyet_tasarrufu = ozet_sayfasi["B15"].value or 0
     verimlilik_artisi = ozet_sayfasi["B16"].value or 0
     kalite_iyilestirme = ozet_sayfasi["B17"].value or 0
     toplam_getiri = maliyet_tasarrufu + verimlilik_artisi + kalite_iyilestirme
-    ozet_sayfasi["B18"].value = toplam_getiri
+    # B18 hücresi formülle hesaplanacak
 
     # Finansal analiz
-    ozet_sayfasi["B21"].value = toplam_yatirim
     roi = (toplam_getiri / toplam_yatirim * 100) if toplam_yatirim else 0
-    ozet_sayfasi["B22"].value = roi
     geri_odeme = (toplam_yatirim / toplam_getiri) if toplam_getiri else 0
-    ozet_sayfasi["B23"].value = geri_odeme
+    # B21, B22 ve B23 hücreleri formül içerdiğinden değer yazılmaz
 
     # Parametreler
     iskonto_orani = ozet_sayfasi["B32"].value or 0
@@ -104,15 +102,14 @@ def roi_hesapla(ozet_sayfasi, wb):
 
     # NPV hesapla (analiz süresi kadar yıl kullanılır)
     npv = sum(bugunku_degerler[:analiz_suresi]) - toplam_yatirim
-    ozet_sayfasi["B24"].value = npv
+    # B24 hücresi formülle hesaplanacak
 
     if toplam_yatirim > 0:
         banka_getiri = toplam_yatirim * ((1 + iskonto_orani) ** analiz_suresi)
-        ozet_sayfasi["B27"].value = banka_getiri
         banka_npv = banka_getiri / ((1 + iskonto_orani) ** analiz_suresi) - sum(
             bugunku_degerler[:analiz_suresi]
         )
-        ozet_sayfasi["B28"].value = banka_npv
+        # B27 ve B28 hücreleri formülle hesaplanacak
     else:
-        ozet_sayfasi["B27"].value = 0
-        ozet_sayfasi["B28"].value = 0
+        banka_getiri = 0
+        banka_npv = 0
