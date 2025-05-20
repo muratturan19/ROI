@@ -112,19 +112,17 @@ def grafik_ekle_xlsxwriter(workbook):
     """Insert summary charts into the workbook."""
     ozet_sayfasi = workbook.get_worksheet_by_name("4-Özet ve ROI")
     
-    # 1. Grafik: Proje Yatırım Maliyetleri (Column Chart)
-    chart1 = workbook.add_chart({'type': 'column'})
+    # 1. Grafik: Proje Yatırım Maliyetleri (Pie Chart)
+    chart1 = workbook.add_chart({'type': 'pie'})
     chart1.add_series({
         'name': 'Proje Yatırım Maliyetleri',
-        'categories': ['4-Özet ve ROI', 3, 0, 7, 0],  # B4:B8 (Maliyet kalemleri başlıkları)
-        'values': ['4-Özet ve ROI', 3, 1, 7, 1],      # B4:B8 (Maliyet değerleri)
-        'fill': {'color': '#4F81BD'},
+        'categories': ['4-Özet ve ROI', 3, 0, 7, 0],  # başlıklar
+        'values': ['4-Özet ve ROI', 3, 1, 7, 1],      # değerler
+        'data_labels': {'value': True, 'percentage': True},
     })
     chart1.set_title({'name': 'Proje Yatırım Maliyetleri'})
-    chart1.set_x_axis({'name': 'Maliyet Türleri'})
-    chart1.set_y_axis({'name': 'Maliyet (TL)'})
-    chart1.set_size({'width': 350, 'height': 250})
-    ozet_sayfasi.insert_chart('H4', chart1)  # H4’e yerleştir (D, E, F sütunlarından sonra)
+    chart1.set_style(10)
+    ozet_sayfasi.insert_chart('H4', chart1)
     
     # 2. Grafik: Yıllık Getiriler (Column Chart)
     chart2 = workbook.add_chart({'type': 'column'})
