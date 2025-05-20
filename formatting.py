@@ -64,12 +64,12 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         sheet.set_row(13, None, bold_format)  # Yıllık Getiriler Özeti
         sheet.set_row(16, None, bold_format)  # Toplam Yıllık Getiri
         sheet.set_row(19, None, bold_format)  # Toplam Yatırım Maliyeti
-        sheet.set_row(20, None, percent_format)  # ROI Değeri
-        sheet.set_row(21, None, year_format)     # Geri Ödeme Süresi
-        sheet.set_row(22, None, bold_format)     # Otomasyon Senaryosu NPV
-        sheet.set_row(23, None, bold_format)     # Alternatif Senaryo başlığı
-        sheet.set_row(24, None, bold_format)     # Bankaya Yatırmanın Analiz Süresi Sonu Değeri
-        sheet.set_row(25, None, bold_format)     # Banka Senaryosu NPV
+        sheet.set_row(21, None, percent_format)  # ROI Değeri
+        sheet.set_row(22, None, year_format)     # Geri Ödeme Süresi
+        sheet.set_row(23, None, bold_format)     # Otomasyon Senaryosu NPV
+        sheet.set_row(24, None, bold_format)     # Alternatif Senaryo başlığı
+        sheet.set_row(25, None, bold_format)     # Bankaya Yatırmanın Analiz Süresi Sonu Değeri
+        sheet.set_row(26, None, bold_format)     # Banka Senaryosu NPV
         sheet.set_row(28, None, percent_format)  # Faiz Oranı
         sheet.set_row(29, None, None)  # Analiz Süresi
         sheet.set_row(30, None, percent_format)  # Yıllık İşçilik Maaş Artışı
@@ -81,7 +81,7 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         
         # Diğer satırlara varsayılan biçimlendirme
         for row in range(1, 50):
-            if row not in [3, 9, 13, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30]:
+            if row not in [3, 9, 13, 16, 19, 21, 22, 23, 24, 25, 26, 28, 29, 30]:
                 sheet.set_row(row, None, cell_format)
     elif sheet.name == "5-NPV_ROI Bilgi":
         # NPV_ROI Bilgi sayfası için basit biçimlendirme
