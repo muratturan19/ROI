@@ -1,6 +1,7 @@
 """Generate an ROI report using xlsxwriter with advanced formatting."""
 
 import xlsxwriter
+from datetime import datetime
 
 from data_templates import (
     ozet_roi_data,
@@ -16,13 +17,38 @@ from formatting import (
 )
 
 
-def create_xlsxwriter_report(filename="roi_report_xlsxwriter.xlsx"):
-    """Create a workbook using xlsxwriter and apply advanced formatting."""
+def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
+    """Create a workbook using xlsxwriter and apply advanced formatting.
+
+    Parameters
+    ----------
+    data : dict
+        Values collected from the GUI form.
+    filename : str, optional
+        Output workbook name.
+    """
     workbook = xlsxwriter.Workbook(filename)
-    # Sheet to host all generated charts
     workbook.add_worksheet("Grafikler")
 
+    ana_sayfa_data = [
+        ["Otomasyon ve Proses İyileştirme ROI Hesaplama Aracı"],
+        [],
+        ["Şirket Adı:", "", "🏢"],
+        ["Proje Adı:", "", "📋"],
+        ["Tarih:", datetime.now().strftime("%d.%m.%Y"), "📅"],
+        [],
+        ["Bu araç, otomasyon ve proses iyileştirme projelerinin finansal etkisini hesaplamak için tasarlanmıştır."],
+        [],
+        ["İçindekiler:"],
+        ["1. Maliyet Tasarrufu Hesaplama", "💰"],
+        ["2. Verimlilik Artışı Hesaplama", "📈"],
+        ["3. Kalite İyileştirme Hesaplama", "🔍"],
+        ["4. Özet ve ROI Analizi", "📊"],
+        ["5. NPV ve ROI Bilgi", "ℹ️"],
+    ]
+
     templates = [
+        ("Ana Sayfa", ana_sayfa_data),
         ("1-Maliyet Tasarrufu", maliyet_tasarrufu_data),
         ("2-Verimlilik Artışı", verimlilik_artisi_data),
         ("3-Kalite İyileştirme", kalite_iyilestirme_data),
@@ -30,17 +56,104 @@ def create_xlsxwriter_report(filename="roi_report_xlsxwriter.xlsx"):
         ("5-NPV_ROI Bilgi", npv_roi_bilgi_data),
     ]
 
-    for sheet_name, data in templates:
+    for sheet_name, tpl in templates:
         sheet = workbook.add_worksheet(sheet_name)
-        for r, row in enumerate(data):
+        for r, row in enumerate(tpl):
             sheet.write_row(r, 0, row)
         sutun_genislikleri_ayarla_xlsxwriter(sheet)
         sayfa_bicimlendir_xlsxwriter(sheet, workbook)
 
+    # Ana sayfa bilgileri
+    ana = workbook.get_worksheet_by_name("Ana Sayfa")
+    if ana:
+        ana.write("B3", data.get("sirket_adi", ""))
+        ana.write("B4", data.get("proje_adi", ""))
+
+    # Maliyet Tasarrufu sayfası verileri
+    maliyet = workbook.get_worksheet_by_name("1-Maliyet Tasarrufu")
+    if maliyet:
+        maliyet.write_number("B5", data.get("mevcut_isci_sayisi", 0))
+        maliyet.write_number("B6", data.get("ortalama_maas", 0))
+        maliyet.write_number("B7", data.get("mevcut_vardiya_sayisi", 0))
+        maliyet.write_number("B11", data.get("otomasyon_sonrasi_isci_sayisi", 0))
+        maliyet.write_number("B12", data.get("otomasyon_sonrasi_maas", 0))
+        maliyet.write_number("B13", data.get("otomasyon_sonrasi_vardiya_sayisi", 0))
+
+        mevcut_maliyet = (
+            data.get("mevcut_isci_sayisi", 0)
+            * data.get("ortalama_maas", 0)
+            * data.get("mevcut_vardiya_sayisi", 0)
+            * 12
+        )
+        otomasyon_maliyet = (
+            data.get("otomasyon_sonrasi_isci_sayisi", 0)
+            * data.get("otomasyon_sonrasi_maas", 0)
+            * data.get("otomasyon_sonrasi_vardiya_sayisi", 0)
+            * 12
+        )
+        maliyet_tasarrufu = mevcut_maliyet - otomasyon_maliyet
+        maliyet.write_number("B14", maliyet_tasarrufu)
+    else:
+        maliyet_tasarrufu = 0
+
+    # Verimlilik artışı sayfası verileri
+    verim = workbook.get_worksheet_by_name("2-Verimlilik Artışı")
+    if verim:
+        verim.write_number("B5", data.get("max_kapasite", 0))
+        verim.write_number("B6", data.get("oee_mevcut", 0) / 100)
+        verim.write_number("B7", data.get("calisma_gunu", 0))
+        verim.write_number("B10", data.get("otomasyon_sonrasi_max_kapasite", 0))
+        verim.write_number("B11", data.get("otomasyon_sonrasi_oee", 0) / 100)
+        verim.write_number("B12", data.get("otomasyon_sonrasi_calisma_gunu", 0))
+        verim.write_number("B15", data.get("birim_urun_fiyati", 0))
+
+        mevcut_uretim = (
+            data.get("max_kapasite", 0)
+            * (data.get("oee_mevcut", 0) / 100)
+            * data.get("calisma_gunu", 0)
+        )
+        otomasyon_uretim = (
+            data.get("otomasyon_sonrasi_max_kapasite", 0)
+            * (data.get("otomasyon_sonrasi_oee", 0) / 100)
+            * data.get("otomasyon_sonrasi_calisma_gunu", 0)
+        )
+        verim_artisi = (otomasyon_uretim - mevcut_uretim) * data.get("birim_urun_fiyati", 0)
+        verim.write_number("B20", verim_artisi)
+    else:
+        verim_artisi = 0
+
+    # Kalite iyileştirme sayfası verileri
+    kalite = workbook.get_worksheet_by_name("3-Kalite İyileştirme")
+    if kalite:
+        kalite.write_number("B5", data.get("iade_urun_sayisi", 0))
+        kalite.write_number("B6", data.get("ortalama_iade_maliyeti", 0))
+        kalite.write_number("B7", data.get("musteri_sikayet_sayisi", 0))
+        kalite.write_number("B8", data.get("ortalama_sikayet_maliyeti", 0))
+        kalite.write_number("B11", data.get("otomasyon_sonrasi_iade_urun_sayisi", 0))
+        kalite.write_number("B12", data.get("otomasyon_sonrasi_iade_maliyeti", 0))
+        kalite.write_number("B13", data.get("otomasyon_sonrasi_sikayet_sayisi", 0))
+        kalite.write_number("B14", data.get("otomasyon_sonrasi_sikayet_maliyeti", 0))
+
+        mevcut_kalite = (
+            data.get("iade_urun_sayisi", 0) * data.get("ortalama_iade_maliyeti", 0)
+            + data.get("musteri_sikayet_sayisi", 0) * data.get("ortalama_sikayet_maliyeti", 0)
+        )
+        otomasyon_kalite = (
+            data.get("otomasyon_sonrasi_iade_urun_sayisi", 0) * data.get("otomasyon_sonrasi_iade_maliyeti", 0)
+            + data.get("otomasyon_sonrasi_sikayet_sayisi", 0) * data.get("otomasyon_sonrasi_sikayet_maliyeti", 0)
+        )
+        kalite_gelir = mevcut_kalite - otomasyon_kalite
+        kalite.write_number("B22", kalite_gelir)
+    else:
+        kalite_gelir = 0
+
     summary = workbook.get_worksheet_by_name("4-Özet ve ROI")
     if summary:
-        summary.write_formula("B11", "=SUM(B5:B9)")
+        summary.write_number("B15", maliyet_tasarrufu)
+        summary.write_number("B16", verim_artisi)
+        summary.write_number("B17", kalite_gelir)
         summary.write_formula("B18", "=SUM(B15:B17)")
+        summary.write_formula("B11", "=SUM(B5:B9)")
         summary.write_formula("B21", "=B11")
         summary.write_formula("B22", "=IF(B11>0,(B18/B11)*100,0)")
         summary.write_formula("B23", "=IF(B18>0,B11/B18,0)")
@@ -86,4 +199,4 @@ def create_xlsxwriter_report(filename="roi_report_xlsxwriter.xlsx"):
 
 
 if __name__ == "__main__":
-    create_xlsxwriter_report()
+    create_xlsxwriter_report({})
