@@ -394,10 +394,10 @@ class ROIHesaplamaArayuzu(QMainWindow):
             kalite_sayfasi['B7'].value = self._to_float(self.musteri_sikayet_sayisi)
             kalite_sayfasi['B8'].value = self._to_float(self.ortalama_sikayet_maliyeti)
 
-            kalite_sayfasi['B11'].value = self._to_float(self.otomasyon_sonrasi_iade_urun_sayisi)
-            kalite_sayfasi['B12'].value = self._to_float(self.otomasyon_sonrasi_iade_maliyeti)
-            kalite_sayfasi['B13'].value = self._to_float(self.otomasyon_sonrasi_sikayet_sayisi)
-            kalite_sayfasi['B14'].value = self._to_float(self.otomasyon_sonrasi_sikayet_maliyeti)
+            kalite_sayfasi['B12'].value = self._to_float(self.otomasyon_sonrasi_iade_urun_sayisi)
+            kalite_sayfasi['B13'].value = self._to_float(self.otomasyon_sonrasi_iade_maliyeti)
+            kalite_sayfasi['B14'].value = self._to_float(self.otomasyon_sonrasi_sikayet_sayisi)
+            kalite_sayfasi['B15'].value = self._to_float(self.otomasyon_sonrasi_sikayet_maliyeti)
 
             # Özet ve ROI sayfasını tanımla
             ozet_sayfasi = wb["4-Özet ve ROI"]
@@ -411,7 +411,7 @@ class ROIHesaplamaArayuzu(QMainWindow):
             # Özet ve ROI sayfasına GUI’den gelen değerleri taşı
             ozet_sayfasi['B15'].value = maliyet_sayfasi['B14'].value  # Yıllık Maliyet Tasarrufu
             ozet_sayfasi['B16'].value = verimlilik_sayfasi['B20'].value  # Yıllık Verimlilik Artışı
-            ozet_sayfasi['B17'].value = kalite_sayfasi['B22'].value  # Yıllık Kalite İyileştirme
+            ozet_sayfasi['B17'].value = kalite_sayfasi['B19'].value  # Yıllık Kalite İyileştirme
 
             # B sütunundaki formülleri ekle
             ozet_sayfasi['B18'].value = '=SUM(B15:B17)'  # Toplam Yıllık Getiri

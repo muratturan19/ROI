@@ -59,7 +59,7 @@ def kalite_iyilestirme_hesapla(kalite_sayfasi):
     ----------
     kalite_sayfasi : openpyxl.worksheet.worksheet.Worksheet
         Worksheet holding quality related costs. The computed improvement is
-        placed in cell ``B22``.
+        placed in cell ``B19``.
     """
     # Mevcut kalite maliyeti
     mevcut_iade_sayisi = kalite_sayfasi['B5'].value or 0
@@ -69,15 +69,15 @@ def kalite_iyilestirme_hesapla(kalite_sayfasi):
     mevcut_kalite_maliyeti = (mevcut_iade_sayisi * mevcut_iade_maliyeti) + (mevcut_sikayet_sayisi * mevcut_sikayet_maliyeti)
 
     # Otomasyon sonrası kalite maliyeti
-    otomasyon_sonrasi_iade_sayisi = kalite_sayfasi['B11'].value or 0
-    otomasyon_sonrasi_iade_maliyeti = kalite_sayfasi['B12'].value or 0
-    otomasyon_sonrasi_sikayet_sayisi = kalite_sayfasi['B13'].value or 0
-    otomasyon_sonrasi_sikayet_maliyeti = kalite_sayfasi['B14'].value or 0
+    otomasyon_sonrasi_iade_sayisi = kalite_sayfasi['B12'].value or 0
+    otomasyon_sonrasi_iade_maliyeti = kalite_sayfasi['B13'].value or 0
+    otomasyon_sonrasi_sikayet_sayisi = kalite_sayfasi['B14'].value or 0
+    otomasyon_sonrasi_sikayet_maliyeti = kalite_sayfasi['B15'].value or 0
     otomasyon_sonrasi_kalite_maliyeti = (otomasyon_sonrasi_iade_sayisi * otomasyon_sonrasi_iade_maliyeti) + (otomasyon_sonrasi_sikayet_sayisi * otomasyon_sonrasi_sikayet_maliyeti)
 
     # Kalite iyileştirme
     kalite_iyilestirme = mevcut_kalite_maliyeti - otomasyon_sonrasi_kalite_maliyeti
-    kalite_sayfasi['B22'].value = kalite_iyilestirme  # Yıllık Kalite İyileştirme
+    kalite_sayfasi['B19'].value = kalite_iyilestirme  # Yıllık Kalite İyileştirme
 
 def roi_hesapla(ozet_sayfasi, wb):
     """Calculate ROI related figures and update the summary sheet.

@@ -129,10 +129,10 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
         kalite.write_number("B6", data.get("ortalama_iade_maliyeti", 0))
         kalite.write_number("B7", data.get("musteri_sikayet_sayisi", 0))
         kalite.write_number("B8", data.get("ortalama_sikayet_maliyeti", 0))
-        kalite.write_number("B11", data.get("otomasyon_sonrasi_iade_urun_sayisi", 0))
-        kalite.write_number("B12", data.get("otomasyon_sonrasi_iade_maliyeti", 0))
-        kalite.write_number("B13", data.get("otomasyon_sonrasi_sikayet_sayisi", 0))
-        kalite.write_number("B14", data.get("otomasyon_sonrasi_sikayet_maliyeti", 0))
+        kalite.write_number("B12", data.get("otomasyon_sonrasi_iade_urun_sayisi", 0))
+        kalite.write_number("B13", data.get("otomasyon_sonrasi_iade_maliyeti", 0))
+        kalite.write_number("B14", data.get("otomasyon_sonrasi_sikayet_sayisi", 0))
+        kalite.write_number("B15", data.get("otomasyon_sonrasi_sikayet_maliyeti", 0))
 
         mevcut_kalite = (
             data.get("iade_urun_sayisi", 0) * data.get("ortalama_iade_maliyeti", 0)
@@ -143,7 +143,7 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
             + data.get("otomasyon_sonrasi_sikayet_sayisi", 0) * data.get("otomasyon_sonrasi_sikayet_maliyeti", 0)
         )
         kalite_gelir = mevcut_kalite - otomasyon_kalite
-        kalite.write_number("B22", kalite_gelir)
+        kalite.write_formula("B19", "=(B5*B6+B7*B8)-(B12*B13+B14*B15)")
     else:
         kalite_gelir = 0
 
