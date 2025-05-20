@@ -108,9 +108,12 @@ def sutun_genislikleri_ayarla_xlsxwriter(sheet):
         sheet.set_column('E:E', 20)  # Yıllık Getiri sütunu (zaten yukarıda ayarlandı)
         sheet.set_column('F:F', 20)  # Bugünkü Değer sütunu (zaten yukarıda ayarlandı)
 
-def grafik_ekle_xlsxwriter(workbook):
-    """Insert summary charts into the workbook."""
+def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
+    """Insert summary charts into the specified worksheet."""
     ozet_sayfasi = workbook.get_worksheet_by_name("4-Özet ve ROI")
+    chart_sheet = workbook.get_worksheet_by_name(chart_sheet_name)
+    if not ozet_sayfasi or not chart_sheet:
+        return
     
     # 1. Grafik: Proje Yatırım Maliyetleri (Pie Chart)
     chart1 = workbook.add_chart({'type': 'pie'})
@@ -122,7 +125,7 @@ def grafik_ekle_xlsxwriter(workbook):
     })
     chart1.set_title({'name': 'Proje Yatırım Maliyetleri'})
     chart1.set_style(10)
-    ozet_sayfasi.insert_chart('H4', chart1)
+    chart_sheet.insert_chart('B2', chart1)
     
     # 2. Grafik: Bugünkü Değerlerin Eğilimi (Line Chart)
     chart2 = workbook.add_chart({'type': 'line'})
@@ -136,7 +139,7 @@ def grafik_ekle_xlsxwriter(workbook):
     chart2.set_x_axis({'name': 'Yıl'})
     chart2.set_y_axis({'name': 'Bugünkü Değer (TL)'})
     chart2.set_size({'width': 350, 'height': 250})
-    ozet_sayfasi.insert_chart('H20', chart2)
+    chart_sheet.insert_chart('B18', chart2)
 
     chart_cum = workbook.add_chart({'type': 'column'})
     chart_cum.add_series({
@@ -155,26 +158,26 @@ def grafik_ekle_xlsxwriter(workbook):
     chart_cum.combine(chart_line)
     chart_cum.set_title({'name': 'Kümülatif Getiri vs Yatırım'})
     chart_cum.set_size({'width': 350, 'height': 250})
-    ozet_sayfasi.insert_chart('H36', chart_cum)
+    chart_sheet.insert_chart('B34', chart_cum)
 
     # 4. Grafik: Otomasyon ve Banka NPV Karşılaştırması
     chart_npv = workbook.add_chart({'type': 'column'})
     chart_npv.add_series({
         'name': 'Otomasyon NPV',
-        'categories': ['4-Özet ve ROI', 51, 6, 52, 6],  # G52:G53
-        'values':     ['4-Özet ve ROI', 51, 7, 52, 7],  # H52:H53
+        'categories': [chart_sheet_name, 0, 0, 1, 0],
+        'values':     [chart_sheet_name, 0, 1, 1, 1],
         'fill': {'color': '#63C384'},
     })
     chart_npv.add_series({
         'name': 'Banka NPV',
-        'categories': ['4-Özet ve ROI', 51, 6, 52, 6],
-        'values':     ['4-Özet ve ROI', 51, 7, 52, 7],
+        'categories': [chart_sheet_name, 0, 0, 1, 0],
+        'values':     [chart_sheet_name, 0, 1, 1, 1],
         'fill': {'color': '#BFBFBF'},
     })
     chart_npv.set_title({'name': 'NPV Karşılaştırması'})
     chart_npv.set_y_axis({'name': 'NPV (TL)'})
     chart_npv.set_size({'width': 350, 'height': 250})
-    ozet_sayfasi.insert_chart('H52', chart_npv)
+    chart_sheet.insert_chart('B50', chart_npv)
 
     # Highlight key performance indicators in a textbox
     kpi_text = (
@@ -183,8 +186,8 @@ def grafik_ekle_xlsxwriter(workbook):
         'Toplam Getiri: =TEXT(B18,"#,##0 ₺")\n'
         'NPV: =TEXT(B24,"#,##0 ₺")'
     )
-    ozet_sayfasi.insert_textbox(
-        'H66',
+    chart_sheet.insert_textbox(
+        'B64',
         kpi_text,
         {'width': 260, 'height': 110, 'fill': {'color': '#DDEBF7'}, 'font': {'bold': True}}
     )
