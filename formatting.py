@@ -174,8 +174,8 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'name': 'Toplam Yatırım',
         'categories': ['4-Özet ve ROI', 3, 3, 7, 3],
         'values': ['4-Özet ve ROI', 3, 7, 7, 7],
+        'line': {'color': 'red', 'width': 2}
     })
-    chart_line.set_line({'color': 'red', 'width': 2})
     chart_cum.combine(chart_line)
     chart_cum.set_title({'name': 'Kümülatif Getiri vs Yatırım'})
     chart_cum.set_size({'width': 700, 'height': 500})
