@@ -98,15 +98,16 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         for row in range(1, 50):
             sheet.set_row(row, None, bold_format if row in [3, 9, 13, 19] else cell_format)
 
-def sutun_genislikleri_ayarla_xlsxwriter(sheet):
+def sutun_genislikleri_ayarla_xlsxwriter(sheet, workbook=None):
     """Set column widths for the given xlsxwriter worksheet."""
     sheet.set_column('A:A', 40)  # A sütunu genişliği
     sheet.set_column('B:B', 20)  # B sütunu genişliği
     if sheet.name == "4-Özet ve ROI":
         sheet.set_column('C:C', 10)  # Grafikler için boşluk
-        sheet.set_column('D:D', 10)  # Yıl sütunu (zaten yukarıda ayarlandı)
-        sheet.set_column('E:E', 20)  # Yıllık Getiri sütunu (zaten yukarıda ayarlandı)
-        sheet.set_column('F:F', 20)  # Bugünkü Değer sütunu (zaten yukarıda ayarlandı)
+        year_col_format = workbook.add_format({'num_format': '0'}) if workbook else None
+        sheet.set_column('D:D', 10, year_col_format)  # Yıl sütunu
+        sheet.set_column('E:E', 20)  # Yıllık Getiri sütunu
+        sheet.set_column('F:F', 20)  # Bugünkü Değer sütunu
 
 def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     """Insert summary charts into the specified worksheet."""
