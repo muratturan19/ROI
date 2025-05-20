@@ -20,6 +20,7 @@ import openpyxl
 from datetime import datetime
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.chart import BarChart, Reference
+from openpyxl.chart.label import DataLabelList
 from data_templates import ozet_roi_data, maliyet_tasarrufu_data, verimlilik_artisi_data, kalite_iyilestirme_data, npv_roi_bilgi_data
 from calculations import maliyet_tasarrufu_hesapla, verimlilik_artisi_hesapla, kalite_iyilestirme_hesapla, roi_hesapla
 from xlsx_report import create_xlsxwriter_report
@@ -64,6 +65,10 @@ class ROIHesaplamaArayuzu(QMainWindow):
 
         # Gelişmiş rapor seçeneği
         self.use_xlsxwriter = QCheckBox("Gelişmiş Excel Raporu (xlsxwriter)")
+        self.use_xlsxwriter.setChecked(True)
+        self.use_xlsxwriter.setToolTip(
+            "İşaretli bırakıldığında grafik_ekle_xlsxwriter fonksiyonundaki dört grafikli rapor oluşturulur."
+        )
         layout.addWidget(self.use_xlsxwriter)
 
         # Hesapla Butonu
@@ -539,9 +544,11 @@ def grafik_ekle(wb):
     chart1.type = "col"
     chart1.style = 12  # Daha modern bir stil
     chart1.title = "Proje Yatırım Maliyetleri"
-    chart1.height = 10  # Grafik yüksekliği
-    chart1.width = 15   # Grafik genişliği
+    chart1.height = 15
+    chart1.width = 20
     chart1.titleOverlay = False  # Başlık grafiğin üstüne taşınır
+    chart1.dLbls = DataLabelList()
+    chart1.dLbls.showVal = True
 
     data = Reference(sheet, min_col=2, min_row=4, max_row=8)
     cats = Reference(sheet, min_col=1, min_row=4, max_row=8)
@@ -556,9 +563,11 @@ def grafik_ekle(wb):
     chart2.type = "col"
     chart2.style = 12  # Daha modern bir stil
     chart2.title = "Yıllık Getiriler"
-    chart2.height = 10  # Grafik yüksekliği
-    chart2.width = 15   # Grafik genişliği
+    chart2.height = 15
+    chart2.width = 20
     chart2.titleOverlay = False  # Başlık grafiğin üstüne taşınır
+    chart2.dLbls = DataLabelList()
+    chart2.dLbls.showVal = True
 
     data = Reference(sheet, min_col=2, min_row=14, max_row=16)
     cats = Reference(sheet, min_col=1, min_row=14, max_row=16)
