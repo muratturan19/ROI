@@ -1,0 +1,133 @@
+def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
+    # Biçimlendirme formatları
+    header_format = workbook.add_format({
+        'bold': True,
+        'font_color': 'white',
+        'bg_color': '#4F81BD',
+        'border': 1,
+        'font_size': 12,
+        'align': 'center',
+        'valign': 'vcenter'
+    })
+    cell_format = workbook.add_format({
+        'border': 1,
+        'num_format': '#,##0.00 ₺',  # Para birimi formatı
+        'font_size': 10,
+        'align': 'left',
+        'valign': 'vcenter'
+    })
+    bold_format = workbook.add_format({
+        'bold': True,
+        'border': 1,
+        'num_format': '#,##0.00 ₺',
+        'font_size': 10,
+        'align': 'left',
+        'valign': 'vcenter',
+        'bg_color': '#DDEBF7'  # Önemli satırları vurgulamak için açık mavi arka plan
+    })
+    percent_format = workbook.add_format({
+        'border': 1,
+        'num_format': '0.00%',  # Yüzde formatı
+        'font_size': 10,
+        'align': 'left',
+        'valign': 'vcenter',
+        'bold': True,
+        'bg_color': '#DDEBF7'
+    })
+    year_format = workbook.add_format({
+        'border': 1,
+        'num_format': '0.00 "yıl"',  # Yıl formatı
+        'font_size': 10,
+        'align': 'left',
+        'valign': 'vcenter',
+        'bold': True,
+        'bg_color': '#DDEBF7'
+    })
+    
+    # Başlık satırını sabit olarak biçimlendir
+    sheet.set_row(0, 30, header_format)  # İlk satır (başlık) için yükseklik ve biçimlendirme
+    
+    # Özet sayfası için özel biçimlendirme
+    if sheet.name == "4-Özet ve ROI":
+        # Önemli satırlara özel biçimlendirme
+        sheet.set_row(3, None, bold_format)   # Proje Yatırım Maliyetleri
+        sheet.set_row(9, None, bold_format)   # Toplam Proje Maliyeti
+        sheet.set_row(13, None, bold_format)  # Yıllık Getiriler Özeti
+        sheet.set_row(16, None, bold_format)  # Toplam Yıllık Getiri
+        sheet.set_row(19, None, bold_format)  # Toplam Yatırım Maliyeti
+        sheet.set_row(20, None, percent_format)  # ROI Değeri
+        sheet.set_row(21, None, year_format)     # Geri Ödeme Süresi
+        sheet.set_row(22, None, bold_format)     # Otomasyon Senaryosu NPV
+        sheet.set_row(23, None, bold_format)     # Alternatif Senaryo başlığı
+        sheet.set_row(24, None, bold_format)     # Bankaya Yatırmanın Analiz Süresi Sonu Değeri
+        sheet.set_row(25, None, bold_format)     # Banka Senaryosu NPV
+        sheet.set_row(28, None, percent_format)  # Faiz Oranı
+        sheet.set_row(29, None, None)  # Analiz Süresi
+        sheet.set_row(30, None, percent_format)  # Yıllık İşçilik Maaş Artışı
+        
+        # Yardımcı sütunlar için biçimlendirme
+        sheet.set_column('D:D', 10)  # Yıl sütunu
+        sheet.set_column('E:E', 20, cell_format)  # Yıllık Getiri sütunu
+        sheet.set_column('F:F', 20, cell_format)  # Bugünkü Değer sütunu
+        
+        # Diğer satırlara varsayılan biçimlendirme
+        for row in range(1, 50):
+            if row not in [3, 9, 13, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30]:
+                sheet.set_row(row, None, cell_format)
+    elif sheet.name == "5-NPV_ROI Bilgi":
+        # NPV_ROI Bilgi sayfası için basit biçimlendirme
+        sheet.set_row(0, 30, header_format)
+        for row in range(1, 50):
+            sheet.set_row(row, None, cell_format)
+        sheet.set_column('A:A', 40)
+        sheet.set_column('B:B', 20)
+        sheet.set_column('C:C', 20)
+        sheet.set_column('D:D', 20)
+        sheet.set_column('E:E', 20)
+    else:
+        # Diğer sayfalar için varsayılan biçimlendirme
+        for row in range(1, 50):
+            sheet.set_row(row, None, bold_format if row in [3, 9, 13, 19] else cell_format)
+
+def sutun_genislikleri_ayarla_xlsxwriter(sheet):
+    sheet.set_column('A:A', 40)  # A sütunu genişliği
+    sheet.set_column('B:B', 20)  # B sütunu genişliği
+    if sheet.name == "4-Özet ve ROI":
+        sheet.set_column('C:C', 10)  # Grafikler için boşluk
+        sheet.set_column('D:D', 10)  # Yıl sütunu (zaten yukarıda ayarlandı)
+        sheet.set_column('E:E', 20)  # Yıllık Getiri sütunu (zaten yukarıda ayarlandı)
+        sheet.set_column('F:F', 20)  # Bugünkü Değer sütunu (zaten yukarıda ayarlandı)
+
+def grafik_ekle_xlsxwriter(workbook):
+    ozet_sayfasi = workbook.get_worksheet_by_name("4-Özet ve ROI")
+    
+    # 1. Grafik: Proje Yatırım Maliyetleri (Column Chart)
+    chart1 = workbook.add_chart({'type': 'column'})
+    chart1.add_series({
+        'name': 'Proje Yatırım Maliyetleri',
+        'categories': ['4-Özet ve ROI', 3, 0, 7, 0],  # B4:B8 (Maliyet kalemleri başlıkları)
+        'values': ['4-Özet ve ROI', 3, 1, 7, 1],      # B4:B8 (Maliyet değerleri)
+        'fill': {'color': '#4F81BD'},
+    })
+    chart1.set_title({'name': 'Proje Yatırım Maliyetleri'})
+    chart1.set_x_axis({'name': 'Maliyet Türleri'})
+    chart1.set_y_axis({'name': 'Maliyet (TL)'})
+    chart1.set_size({'width': 350, 'height': 250})
+    ozet_sayfasi.insert_chart('H4', chart1)  # H4’e yerleştir (D, E, F sütunlarından sonra)
+    
+    # 2. Grafik: Yıllık Getiriler (Column Chart)
+    chart2 = workbook.add_chart({'type': 'column'})
+    chart2.add_series({
+        'name': 'Yıllık Getiriler',
+        'categories': ['4-Özet ve ROI', 13, 0, 15, 0],  # B14:B16 (Getiri türleri başlıkları)
+        'values': ['4-Özet ve ROI', 13, 1, 15, 1],      # B14:B16 (Getiri değerleri)
+        'fill': {'color': '#4F81BD'},
+    })
+    chart2.set_title({'name': 'Yıllık Getiriler'})
+    chart2.set_x_axis({'name': 'Getiri Türleri'})
+    chart2.set_y_axis({'name': 'Getiri (TL)'})
+    chart2.set_size({'width': 350, 'height': 250})
+    ozet_sayfasi.insert_chart('H20', chart2)  # H20’ye yerleştir
+
+def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
+    pass

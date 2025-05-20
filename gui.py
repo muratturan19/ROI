@@ -1,0 +1,457 @@
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+                             QLabel, QPushButton, QTabWidget, QFormLayout, 
+                             QLineEdit, QMessageBox)
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
+import sys
+import openpyxl
+from datetime import datetime
+from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
+from openpyxl.chart import BarChart, Reference
+from data_templates import ozet_roi_data, maliyet_tasarrufu_data, verimlilik_artisi_data, kalite_iyilestirme_data, npv_roi_bilgi_data
+from calculations import maliyet_tasarrufu_hesapla, verimlilik_artisi_hesapla, kalite_iyilestirme_hesapla, roi_hesapla
+
+class ROIHesaplamaArayuzu(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('ROI Hesaplama Aracı')
+        self.setGeometry(100, 100, 800, 600)
+
+        # Merkezi widget
+        merkezi_widget = QWidget()
+        self.setCentralWidget(merkezi_widget)
+
+        # Ana düzen
+        layout = QVBoxLayout()
+        merkezi_widget.setLayout(layout)
+
+        # Başlık
+        baslik = QLabel('Otomasyon ROI Hesaplama Aracı')
+        baslik.setFont(QFont('Calibri', 16, QFont.Bold))
+        baslik.setAlignment(Qt.AlignCenter)
+        layout.addWidget(baslik)
+
+        # Tab Widget Oluştur
+        self.tab_widget = QTabWidget()
+        layout.addWidget(self.tab_widget)
+
+        # Sayfaları Oluştur
+        self.sirket_bilgileri_sayfasi()
+        self.maliyet_tasarrufu_sayfasi()
+        self.verimlilik_sayfasi()
+        self.kalite_sayfasi()
+
+        # Hesapla Butonu
+        hesapla_btn = QPushButton('ROI Hesapla')
+        hesapla_btn.setStyleSheet("""
+            background-color: #4F81BD; 
+            color: white; 
+            padding: 10px;
+            font-weight: bold;
+        """)
+        hesapla_btn.clicked.connect(self.roi_hesapla)
+        layout.addWidget(hesapla_btn)
+
+        # Stil
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #F0F0F0;
+            }
+            QLabel {
+                color: #4F81BD;
+                padding: 10px;
+            }
+        """)
+
+    def sirket_bilgileri_sayfasi(self):
+        sayfa = QWidget()
+        layout = QFormLayout()
+
+        # Şirket bilgileri input alanları
+        self.sirket_adi = QLineEdit()
+        self.proje_adi = QLineEdit()
+        self.yetkili_kisi = QLineEdit()
+
+        layout.addRow("Şirket Adı:", self.sirket_adi)
+        layout.addRow("Proje Adı:", self.proje_adi)
+        layout.addRow("Yetkili Kişi:", self.yetkili_kisi)
+
+        sayfa.setLayout(layout)
+        self.tab_widget.addTab(sayfa, "Şirket Bilgileri")
+
+    def maliyet_tasarrufu_sayfasi(self):
+        sayfa = QWidget()
+        layout = QFormLayout()
+
+        # Mevcut Durum Input Alanları
+        self.mevcut_isci_sayisi = QLineEdit()
+        self.ortalama_maas = QLineEdit()
+        self.mevcut_vardiya_sayisi = QLineEdit()
+
+        # Otomasyon Sonrası Input Alanları
+        self.otomasyon_sonrasi_isci_sayisi = QLineEdit()
+        self.otomasyon_sonrasi_maas = QLineEdit()
+        self.otomasyon_sonrasi_vardiya_sayisi = QLineEdit()
+
+        # Mevcut Durum Grubu
+        layout.addRow("🔹 Mevcut Durum", QLabel(""))
+        layout.addRow("Mevcut İşçi Sayısı:", self.mevcut_isci_sayisi)
+        layout.addRow("Ortalama Aylık Maaş:", self.ortalama_maas)
+        layout.addRow("Vardiya Sayısı:", self.mevcut_vardiya_sayisi)
+
+        # Boşluk
+        layout.addRow("", QLabel(""))
+
+        # Otomasyon Sonrası Grubu
+        layout.addRow("🔹 Otomasyon Sonrası", QLabel(""))
+        layout.addRow("Otomasyon Sonrası İşçi Sayısı:", self.otomasyon_sonrasi_isci_sayisi)
+        layout.addRow("Ortalama Aylık Maaş:", self.otomasyon_sonrasi_maas)
+        layout.addRow("Vardiya Sayısı:", self.otomasyon_sonrasi_vardiya_sayisi)
+
+        sayfa.setLayout(layout)
+        self.tab_widget.addTab(sayfa, "Maliyet Tasarrufu")
+
+    def verimlilik_sayfasi(self):
+        sayfa = QWidget()
+        layout = QFormLayout()
+
+        # Mevcut Durum Input Alanları
+        self.max_kapasite = QLineEdit()
+        self.oee_mevcut = QLineEdit()
+        self.calisma_gunu = QLineEdit()
+
+        # Otomasyon Sonrası Input Alanları
+        self.otomasyon_sonrasi_max_kapasite = QLineEdit()
+        self.otomasyon_sonrasi_oee = QLineEdit()
+        self.otomasyon_sonrasi_calisma_gunu = QLineEdit()
+
+        # Birim Ürün Fiyatı
+        self.birim_urun_fiyati = QLineEdit()
+
+        # Mevcut Durum Grubu
+        layout.addRow(QLabel("<b>🔹 Mevcut Durum</b>"))
+        layout.addRow("Maksimum Günlük Kapasite (adet/gün):", self.max_kapasite)
+        layout.addRow("OEE (%) :", self.oee_mevcut)
+        layout.addRow("Yıllık Çalışma Günü:", self.calisma_gunu)
+
+        # Boşluk
+        layout.addRow("", QLabel(""))
+
+        # Otomasyon Sonrası Grubu
+        layout.addRow(QLabel("<b>🔹 Otomasyon Sonrası</b>"))
+        layout.addRow("Yeni Maksimum Kapasite (adet/gün):", self.otomasyon_sonrasi_max_kapasite)
+        layout.addRow("Yeni OEE (%):", self.otomasyon_sonrasi_oee)
+        layout.addRow("Yeni Yıllık Çalışma Günü:", self.otomasyon_sonrasi_calisma_gunu)
+
+        # Birim Ürün Fiyatı
+        layout.addRow("", QLabel(""))
+        layout.addRow(QLabel("<b>🔹 Birim Ürün Fiyatı (TL/adet)</b>"))
+        layout.addRow("Ürün Birim Fiyatı (TL):", self.birim_urun_fiyati)
+
+        sayfa.setLayout(layout)
+        self.tab_widget.addTab(sayfa, "Verimlilik")
+
+    def kalite_sayfasi(self):
+        sayfa = QWidget()
+        layout = QFormLayout()
+
+        # Mevcut Durum Input Alanları
+        self.iade_urun_sayisi = QLineEdit()
+        self.ortalama_iade_maliyeti = QLineEdit()
+        self.musteri_sikayet_sayisi = QLineEdit()
+        self.ortalama_sikayet_maliyeti = QLineEdit()
+
+        # Otomasyon Sonrası Input Alanları
+        self.otomasyon_sonrasi_iade_urun_sayisi = QLineEdit()
+        self.otomasyon_sonrasi_iade_maliyeti = QLineEdit()
+        self.otomasyon_sonrasi_sikayet_sayisi = QLineEdit()
+        self.otomasyon_sonrasi_sikayet_maliyeti = QLineEdit()
+
+        # Mevcut Durum Grubu
+        layout.addRow("🔹 Mevcut Durum", QLabel(""))
+        layout.addRow("Yıllık İade Ürün Sayısı:", self.iade_urun_sayisi)
+        layout.addRow("Ortalama İade Maliyeti:", self.ortalama_iade_maliyeti)
+        layout.addRow("Yıllık Müşteri Şikayet Sayısı:", self.musteri_sikayet_sayisi)
+        layout.addRow("Ortalama Şikayet Maliyeti:", self.ortalama_sikayet_maliyeti)
+
+        # Boşluk
+        layout.addRow("", QLabel(""))
+
+        # Otomasyon Sonrası Grubu
+        layout.addRow("🔹 Otomasyon Sonrası", QLabel(""))
+        layout.addRow("Yıllık İade Ürün Sayısı:", self.otomasyon_sonrasi_iade_urun_sayisi)
+        layout.addRow("Ortalama İade Maliyeti:", self.otomasyon_sonrasi_iade_maliyeti)
+        layout.addRow("Yıllık Müşteri Şikayet Sayısı:", self.otomasyon_sonrasi_sikayet_sayisi)
+        layout.addRow("Ortalama Şikayet Maliyeti:", self.otomasyon_sonrasi_sikayet_maliyeti)
+
+        sayfa.setLayout(layout)
+        self.tab_widget.addTab(sayfa, "Kalite")
+
+    def roi_hesapla(self):
+        try:
+            # Tüm input alanlarından verileri al
+            sirket_adi = self.sirket_adi.text() or "Bilinmeyen Şirket"
+            proje_adi = self.proje_adi.text() or "Isimsiz Proje"
+
+            # Excel oluşturma
+            wb = openpyxl.Workbook()
+
+            # Tarih bilgisini ekle
+            ana_sayfa_data = [
+                ["Otomasyon ve Proses İyileştirme ROI Hesaplama Aracı"],
+                [],
+                ["Şirket Adı:", "", "🏢"],
+                ["Proje Adı:", "", "📋"],
+                ["Tarih:", datetime.now().strftime("%d.%m.%Y"), "📅"],
+                [],
+                ["Bu araç, otomasyon ve proses iyileştirme projelerinin finansal etkisini hesaplamak için tasarlanmıştır."],
+                [],
+                ["İçindekiler:"],
+                ["1. Maliyet Tasarrufu Hesaplama", "💰"],
+                ["2. Verimlilik Artışı Hesaplama", "📈"],
+                ["3. Kalite İyileştirme Hesaplama", "🔍"],
+                ["4. Özet ve ROI Analizi", "📊"],
+                ["5. NPV ve ROI Bilgi", "ℹ️"]
+            ]
+
+            # Sayfa oluşturma ve veri şablonlarını doldurma
+            sayfalar = [
+                ("Ana Sayfa", ana_sayfa_data),
+                ("1-Maliyet Tasarrufu", maliyet_tasarrufu_data),
+                ("2-Verimlilik Artışı", verimlilik_artisi_data),
+                ("3-Kalite İyileştirme", kalite_iyilestirme_data),
+                ("4-Özet ve ROI", ozet_roi_data),
+                ("5-NPV_ROI Bilgi", npv_roi_bilgi_data)
+            ]
+
+            for baslik, sablon in sayfalar:
+                sayfa = wb.create_sheet(baslik)
+                for satir_index, satir in enumerate(sablon, start=1):
+                    for sutun_index, deger in enumerate(satir, start=1):
+                        hucre = sayfa.cell(row=satir_index, column=sutun_index)
+                        hucre.value = deger
+
+            # İlk boş sayfayı sil
+            wb.remove(wb['Sheet'])
+
+            # Ana Sayfa bilgilerini güncelle
+            ana_sayfa = wb["Ana Sayfa"]
+            ana_sayfa['B3'].value = sirket_adi
+            ana_sayfa['B4'].value = proje_adi
+
+            # Verileri doldur
+            maliyet_sayfasi = wb["1-Maliyet Tasarrufu"]
+            maliyet_sayfasi['B5'].value = float(self.mevcut_isci_sayisi.text() or 0)
+            maliyet_sayfasi['B6'].value = float(self.ortalama_maas.text() or 0)
+            maliyet_sayfasi['B7'].value = float(self.mevcut_vardiya_sayisi.text() or 0)
+
+            maliyet_sayfasi['B11'].value = float(self.otomasyon_sonrasi_isci_sayisi.text() or 0)
+            maliyet_sayfasi['B12'].value = float(self.otomasyon_sonrasi_maas.text() or 0)
+            maliyet_sayfasi['B13'].value = float(self.otomasyon_sonrasi_vardiya_sayisi.text() or 0)
+
+            # Verimlilik Sayfası Verileri
+            verimlilik_sayfasi = wb["2-Verimlilik Artışı"]
+            verimlilik_sayfasi['B5'].value = float(self.max_kapasite.text() or 0)
+            verimlilik_sayfasi['B6'].value = float(self.oee_mevcut.text() or 0) / 100  # OEE yüzdesi oran olarak kaydedilecek
+            verimlilik_sayfasi['B7'].value = float(self.calisma_gunu.text() or 0)
+
+            verimlilik_sayfasi['B10'].value = float(self.otomasyon_sonrasi_max_kapasite.text() or 0)
+            verimlilik_sayfasi['B11'].value = float(self.otomasyon_sonrasi_oee.text() or 0) / 100  # OEE yüzdesi oran olarak kaydedilecek
+            verimlilik_sayfasi['B12'].value = float(self.otomasyon_sonrasi_calisma_gunu.text() or 0)
+
+            verimlilik_sayfasi['B15'].value = float(self.birim_urun_fiyati.text() or 0)
+
+            # Kalite sayfası verileri
+            kalite_sayfasi = wb["3-Kalite İyileştirme"]
+            kalite_sayfasi['B5'].value = float(self.iade_urun_sayisi.text() or 0)
+            kalite_sayfasi['B6'].value = float(self.ortalama_iade_maliyeti.text() or 0)
+            kalite_sayfasi['B7'].value = float(self.musteri_sikayet_sayisi.text() or 0)
+            kalite_sayfasi['B8'].value = float(self.ortalama_sikayet_maliyeti.text() or 0)
+
+            kalite_sayfasi['B11'].value = float(self.otomasyon_sonrasi_iade_urun_sayisi.text() or 0)
+            kalite_sayfasi['B12'].value = float(self.otomasyon_sonrasi_iade_maliyeti.text() or 0)
+            kalite_sayfasi['B13'].value = float(self.otomasyon_sonrasi_sikayet_sayisi.text() or 0)
+            kalite_sayfasi['B14'].value = float(self.otomasyon_sonrasi_sikayet_maliyeti.text() or 0)
+
+            # Özet ve ROI sayfasını tanımla
+            ozet_sayfasi = wb["4-Özet ve ROI"]
+
+            # Hesaplama fonksiyonlarını çağır
+            maliyet_tasarrufu_hesapla(maliyet_sayfasi)
+            verimlilik_artisi_hesapla(verimlilik_sayfasi)
+            kalite_iyilestirme_hesapla(kalite_sayfasi)
+            roi_hesapla(ozet_sayfasi, wb)
+
+            # Özet ve ROI sayfasına GUI’den gelen değerleri taşı
+            ozet_sayfasi['B15'].value = maliyet_sayfasi['B14'].value  # Yıllık Maliyet Tasarrufu
+            ozet_sayfasi['B16'].value = verimlilik_sayfasi['B20'].value  # Yıllık Verimlilik Artışı
+            ozet_sayfasi['B17'].value = kalite_sayfasi['B22'].value  # Yıllık Kalite İyileştirme
+
+            # B sütunundaki formülleri ekle
+            ozet_sayfasi['B18'].value = '=SUM(B15:B17)'  # Toplam Yıllık Getiri
+            ozet_sayfasi['B21'].value = '=B11'  # Toplam Yatırım Maliyeti (Finansal Analiz)
+            ozet_sayfasi['B22'].value = '=IF(B11>0,(B18/B11)*100,0)'  # ROI (%)
+            ozet_sayfasi['B23'].value = '=IF(B18>0,B11/B18,0)'  # Geri Ödeme Süresi
+
+            # Yardımcı sütunlar (D, E, F) ekle
+            ozet_sayfasi['D1'].value = "Yıl"
+            ozet_sayfasi['E1'].value = "Yıllık Getiri (TL)"
+            ozet_sayfasi['F1'].value = "Bugünkü Değer (TL)"
+            for i in range(1, 6):
+                ozet_sayfasi[f'D{i+3}'].value = i  # D4:D8: 1’den 5’e kadar yıllar
+
+            # E ve F sütunlarındaki formülleri ekle
+            ozet_sayfasi['E4'].value = '=B18'  # 1. yıl getirisi
+            ozet_sayfasi['E5'].value = '=E4*(1+B34)'  # 2. yıl getirisi (Yıllık İşçilik Maaş Artışı)
+            ozet_sayfasi['E6'].value = '=E5*(1+B34)'  # 3. yıl getirisi
+            ozet_sayfasi['E7'].value = '=E6*(1+B34)'  # 4. yıl getirisi
+            ozet_sayfasi['E8'].value = '=E7*(1+B34)'  # 5. yıl getirisi
+
+            ozet_sayfasi['F4'].value = '=E4'  # 1. yıl bugünkü değeri (iskonto yok)
+            ozet_sayfasi['F5'].value = '=E5/(1+B32)^1'  # 2. yıl bugünkü değeri
+            ozet_sayfasi['F6'].value = '=E6/(1+B32)^2'  # 3. yıl bugünkü değeri
+            ozet_sayfasi['F7'].value = '=E7/(1+B32)^3'  # 4. yıl bugünkü değeri
+            ozet_sayfasi['F8'].value = '=E8/(1+B32)^4'  # 5. yıl bugünkü değeri
+
+            # NPV ve Banka Faizi formüllerini ekle
+            ozet_sayfasi['B24'].value = '=SUM(F4:INDEX(F4:F8,B33))-B11'  # NPV
+            ozet_sayfasi['B27'].value = '=IF(B11>0,B11*(1+B32)^B33,0)'  # Banka Faizi ile Elde Edilecek Getiri
+            ozet_sayfasi['B28'].value = '=IF(B11>0,B27/(1+B32)^B33-SUM(F4:INDEX(F4:F8,B33)),0)'  # Banka Faizi NPV
+
+            # Grafik ekle
+            grafik_ekle(wb)
+
+            # Sayfa biçimlendirmeleri
+            for sayfa in wb.sheetnames:
+                sutun_genislikleri_ayarla(wb[sayfa])
+                sayfa_bicimlendir(wb[sayfa])
+
+            # Dosya kaydetme
+            dosya_adi = f"{sirket_adi}_{proje_adi}_ROI_Raporu_{datetime.now().strftime('%Y%m%d')}.xlsx"
+            wb.save(dosya_adi)
+
+            # Kullanıcıya bilgilendirme
+            QMessageBox.information(
+                self, 
+                "Başarılı", 
+                f"ROI Raporu {dosya_adi} olarak kaydedildi!"
+            )
+        except Exception as e:
+            QMessageBox.warning(self, "Hata", f"Hesaplamada sorun oluştu: {str(e)}")
+
+def sayfa_bicimlendir(sheet):
+    # Başlık ve alt başlık stilleri
+    baslik_font = Font(name='Calibri', size=14, bold=True, color="FFFFFF")
+    alt_baslik_font = Font(name='Calibri', size=12, bold=True)
+    normal_font = Font(name='Calibri', size=11)
+    bold_font = Font(name='Calibri', size=11, bold=True)  # Sonuç için kalın font
+
+    # Dolgular
+    baslik_dolgu = PatternFill(start_color='4F81BD', end_color='4F81BD', fill_type="solid")
+    alt_baslik_dolgu = PatternFill(start_color='B8CCE4', end_color='B8CCE4', fill_type="solid")
+
+    # Kenarlık
+    kenarlik = Border(
+        left=Side(style='thin', color='A0A0A0'),
+        right=Side(style='thin', color='A0A0A0'),
+        top=Side(style='thin', color='A0A0A0'),
+        bottom=Side(style='thin', color='A0A0A0')
+    )
+
+    # Hücreleri biçimlendir
+    for row in sheet.iter_rows():
+        for cell in row:
+            cell.font = normal_font
+            cell.border = kenarlik
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # İlk satırı başlık olarak biçimlendir
+            if cell.row == 1:
+                cell.font = baslik_font
+                cell.fill = baslik_dolgu
+
+            # İkinci satırı alt başlık olarak biçimlendir
+            if cell.row == 2:
+                cell.font = alt_baslik_font
+                cell.fill = alt_baslik_dolgu
+
+            # NPV ve ROI Bilgi sayfasında "Sonuç:" satırlarını kalın yap
+            if sheet.title == "5-NPV_ROI Bilgi" and cell.value == "Sonuç:":
+                cell.font = bold_font
+
+def sutun_genislikleri_ayarla(sheet):
+    # Sütun genişliklerini otomatik ayarla, ancak bazı sütunlar için sabit genişlik belirle
+    for column in sheet.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+
+        # Özet sheet’inde B sütunu için genişliği 32’ye sabitle
+        if sheet.title == "4-Özet ve ROI" and column_letter == "B":
+            sheet.column_dimensions[column_letter].width = 32
+            continue
+
+        # NPV_ROI Bilgi sheet’inde A sütunu için genişliği 50’ye sabitle
+        if sheet.title == "5-NPV_ROI Bilgi" and column_letter == "A":
+            sheet.column_dimensions[column_letter].width = 50
+            continue
+
+        # Diğer sütunlar için otomatik genişlik ayarlama
+        for cell in column:
+            try:
+                if cell.value:
+                    cell_length = len(str(cell.value))
+                    max_length = max(max_length, cell_length)
+            except:
+                pass
+
+        adjusted_width = (max_length + 2)
+        sheet.column_dimensions[column_letter].width = adjusted_width
+
+def grafik_ekle(wb):
+    sheet = wb["4-Özet ve ROI"]
+
+    # Yatırım Maliyetleri Grafiği
+    chart1 = BarChart()
+    chart1.type = "col"
+    chart1.style = 12  # Daha modern bir stil
+    chart1.title = "Proje Yatırım Maliyetleri"
+    chart1.height = 10  # Grafik yüksekliği
+    chart1.width = 15   # Grafik genişliği
+    chart1.titleOverlay = False  # Başlık grafiğin üstüne taşınır
+
+    data = Reference(sheet, min_col=2, min_row=4, max_row=8)
+    cats = Reference(sheet, min_col=1, min_row=4, max_row=8)
+
+    chart1.add_data(data, titles_from_data=False)
+    chart1.set_categories(cats)
+
+    sheet.add_chart(chart1, "H1")  # Grafiği H1’e taşı
+
+    # Getiriler Grafiği
+    chart2 = BarChart()
+    chart2.type = "col"
+    chart2.style = 12  # Daha modern bir stil
+    chart2.title = "Yıllık Getiriler"
+    chart2.height = 10  # Grafik yüksekliği
+    chart2.width = 15   # Grafik genişliği
+    chart2.titleOverlay = False  # Başlık grafiğin üstüne taşınır
+
+    data = Reference(sheet, min_col=2, min_row=14, max_row=16)
+    cats = Reference(sheet, min_col=1, min_row=14, max_row=16)
+
+    chart2.add_data(data, titles_from_data=False)
+    chart2.set_categories(cats)
+
+    sheet.add_chart(chart2, "H21")  # Grafiği H21’ye taşı
+
+def main():
+    app = QApplication(sys.argv)
+    pencere = ROIHesaplamaArayuzu()
+    pencere.show()
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
