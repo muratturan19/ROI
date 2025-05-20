@@ -124,33 +124,19 @@ def grafik_ekle_xlsxwriter(workbook):
     chart1.set_style(10)
     ozet_sayfasi.insert_chart('H4', chart1)
     
-    # 2. Grafik: Yıllık Getiriler (Column Chart)
-    chart2 = workbook.add_chart({'type': 'column'})
+    # 2. Grafik: Bugünkü Değerlerin Eğilimi (Line Chart)
+    chart2 = workbook.add_chart({'type': 'line'})
     chart2.add_series({
-        'name': 'Yıllık Getiriler',
-        'categories': ['4-Özet ve ROI', 13, 0, 15, 0],  # B14:B16 (Getiri türleri başlıkları)
-        'values': ['4-Özet ve ROI', 13, 1, 15, 1],      # B14:B16 (Getiri değerleri)
-        'fill': {'color': '#4F81BD'},
-    })
-    chart2.set_title({'name': 'Yıllık Getiriler'})
-    chart2.set_x_axis({'name': 'Getiri Türleri'})
-    chart2.set_y_axis({'name': 'Getiri (TL)'})
-    chart2.set_size({'width': 350, 'height': 250})
-    ozet_sayfasi.insert_chart('H20', chart2)  # H20’ye yerleştir
-
-    # 3. Grafik: Bugünkü Değerlerin Eğilimi (Line Chart)
-    chart3 = workbook.add_chart({'type': 'line'})
-    chart3.add_series({
         'name': 'Bugünkü Değer',
         'categories': ['4-Özet ve ROI', 3, 3, 7, 3],  # D4:D8 yıllar
         'values': ['4-Özet ve ROI', 3, 5, 7, 5],      # F4:F8 bugünkü değerler
         'line': {'color': '#C0504D'},
     })
-    chart3.set_title({'name': 'NPV Eğilimi'})
-    chart3.set_x_axis({'name': 'Yıl'})
-    chart3.set_y_axis({'name': 'Bugünkü Değer (TL)'})
-    chart3.set_size({'width': 350, 'height': 250})
-    ozet_sayfasi.insert_chart('H36', chart3)
+    chart2.set_title({'name': 'NPV Eğilimi'})
+    chart2.set_x_axis({'name': 'Yıl'})
+    chart2.set_y_axis({'name': 'Bugünkü Değer (TL)'})
+    chart2.set_size({'width': 350, 'height': 250})
+    ozet_sayfasi.insert_chart('H20', chart2)
 
 def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
     """Placeholder for a detailed ROI calculation."""
