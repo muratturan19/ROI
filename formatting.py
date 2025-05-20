@@ -157,6 +157,25 @@ def grafik_ekle_xlsxwriter(workbook):
     chart_cum.set_size({'width': 350, 'height': 250})
     ozet_sayfasi.insert_chart('H36', chart_cum)
 
+    # 4. Grafik: Otomasyon ve Banka NPV Karşılaştırması
+    chart_npv = workbook.add_chart({'type': 'column'})
+    chart_npv.add_series({
+        'name': 'Otomasyon NPV',
+        'categories': ['4-Özet ve ROI', 51, 6, 52, 6],  # G52:G53
+        'values':     ['4-Özet ve ROI', 51, 7, 52, 7],  # H52:H53
+        'fill': {'color': '#63C384'},
+    })
+    chart_npv.add_series({
+        'name': 'Banka NPV',
+        'categories': ['4-Özet ve ROI', 51, 6, 52, 6],
+        'values':     ['4-Özet ve ROI', 51, 7, 52, 7],
+        'fill': {'color': '#BFBFBF'},
+    })
+    chart_npv.set_title({'name': 'NPV Karşılaştırması'})
+    chart_npv.set_y_axis({'name': 'NPV (TL)'})
+    chart_npv.set_size({'width': 350, 'height': 250})
+    ozet_sayfasi.insert_chart('H52', chart_npv)
+
 def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
     """Placeholder for a detailed ROI calculation."""
     pass
