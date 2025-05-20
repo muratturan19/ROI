@@ -23,11 +23,15 @@ from data_templates import ozet_roi_data, maliyet_tasarrufu_data, verimlilik_art
 from calculations import maliyet_tasarrufu_hesapla, verimlilik_artisi_hesapla, kalite_iyilestirme_hesapla, roi_hesapla
 
 class ROIHesaplamaArayuzu(QMainWindow):
+    """Main window providing forms to collect ROI parameters."""
+
     def __init__(self):
+        """Initialize the window and build the interface."""
         super().__init__()
         self.initUI()
 
     def initUI(self):
+        """Create widgets and layout for all tabs."""
         self.setWindowTitle('ROI Hesaplama Aracı')
         self.setGeometry(100, 100, 800, 600)
 
@@ -74,6 +78,7 @@ class ROIHesaplamaArayuzu(QMainWindow):
         )
 
     def sirket_bilgileri_sayfasi(self):
+        """Create the tab for entering company information."""
         sayfa = QWidget()
         ana_layout = QVBoxLayout()
         sayfa.setLayout(ana_layout)
@@ -97,6 +102,7 @@ class ROIHesaplamaArayuzu(QMainWindow):
         self.tab_widget.addTab(sayfa, icon, "Şirket Bilgileri")
 
     def maliyet_tasarrufu_sayfasi(self):
+        """Create the tab for labor cost comparison."""
         sayfa = QWidget()
         ana_layout = QVBoxLayout()
         sayfa.setLayout(ana_layout)
@@ -134,6 +140,7 @@ class ROIHesaplamaArayuzu(QMainWindow):
         self.tab_widget.addTab(sayfa, icon, "Maliyet Tasarrufu")
 
     def verimlilik_sayfasi(self):
+        """Create the tab for productivity inputs."""
         sayfa = QWidget()
         ana_layout = QVBoxLayout()
         sayfa.setLayout(ana_layout)
@@ -180,6 +187,7 @@ class ROIHesaplamaArayuzu(QMainWindow):
         self.tab_widget.addTab(sayfa, icon, "Verimlilik")
 
     def kalite_sayfasi(self):
+        """Create the tab for quality metrics."""
         sayfa = QWidget()
         ana_layout = QVBoxLayout()
         sayfa.setLayout(ana_layout)
@@ -221,6 +229,7 @@ class ROIHesaplamaArayuzu(QMainWindow):
         self.tab_widget.addTab(sayfa, icon, "Kalite")
 
     def roi_hesapla(self):
+        """Collect user inputs, perform calculations and export the report."""
         try:
             # Tüm input alanlarından verileri al
             sirket_adi = self.sirket_adi.text() or "Bilinmeyen Şirket"
@@ -373,6 +382,7 @@ class ROIHesaplamaArayuzu(QMainWindow):
             QMessageBox.warning(self, "Hata", f"Hesaplamada sorun oluştu: {str(e)}")
 
 def sayfa_bicimlendir(sheet):
+    """Apply openpyxl styles to the provided worksheet."""
     # Başlık ve alt başlık stilleri
     baslik_font = Font(name='Calibri', size=14, bold=True, color="FFFFFF")
     alt_baslik_font = Font(name='Calibri', size=12, bold=True)
@@ -413,6 +423,7 @@ def sayfa_bicimlendir(sheet):
                 cell.font = bold_font
 
 def sutun_genislikleri_ayarla(sheet):
+    """Automatically adjust column widths on an openpyxl worksheet."""
     # Sütun genişliklerini otomatik ayarla, ancak bazı sütunlar için sabit genişlik belirle
     for column in sheet.columns:
         max_length = 0
@@ -441,6 +452,7 @@ def sutun_genislikleri_ayarla(sheet):
         sheet.column_dimensions[column_letter].width = adjusted_width
 
 def grafik_ekle(wb):
+    """Insert default charts into the summary worksheet."""
     sheet = wb["4-Özet ve ROI"]
 
     # Yatırım Maliyetleri Grafiği
@@ -478,6 +490,7 @@ def grafik_ekle(wb):
     sheet.add_chart(chart2, "H21")  # Grafiği H21’ye taşı
 
 def main():
+    """Launch the ROI calculator GUI."""
     app = QApplication(sys.argv)
     pencere = ROIHesaplamaArayuzu()
     pencere.show()

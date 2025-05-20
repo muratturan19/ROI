@@ -1,4 +1,13 @@
 def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
+    """Apply formatting rules for a worksheet created with xlsxwriter.
+
+    Parameters
+    ----------
+    sheet : xlsxwriter.worksheet.Worksheet
+        Worksheet to format.
+    workbook : xlsxwriter.Workbook
+        Parent workbook used to create style objects.
+    """
     # Biçimlendirme formatları
     header_format = workbook.add_format({
         'bold': True,
@@ -90,6 +99,7 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
             sheet.set_row(row, None, bold_format if row in [3, 9, 13, 19] else cell_format)
 
 def sutun_genislikleri_ayarla_xlsxwriter(sheet):
+    """Set column widths for the given xlsxwriter worksheet."""
     sheet.set_column('A:A', 40)  # A sütunu genişliği
     sheet.set_column('B:B', 20)  # B sütunu genişliği
     if sheet.name == "4-Özet ve ROI":
@@ -99,6 +109,7 @@ def sutun_genislikleri_ayarla_xlsxwriter(sheet):
         sheet.set_column('F:F', 20)  # Bugünkü Değer sütunu (zaten yukarıda ayarlandı)
 
 def grafik_ekle_xlsxwriter(workbook):
+    """Insert summary charts into the workbook."""
     ozet_sayfasi = workbook.get_worksheet_by_name("4-Özet ve ROI")
     
     # 1. Grafik: Proje Yatırım Maliyetleri (Column Chart)
@@ -144,4 +155,5 @@ def grafik_ekle_xlsxwriter(workbook):
     ozet_sayfasi.insert_chart('H36', chart3)
 
 def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
+    """Placeholder for a detailed ROI calculation."""
     pass

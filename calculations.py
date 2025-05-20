@@ -1,6 +1,14 @@
 # calculations.py
 
 def maliyet_tasarrufu_hesapla(maliyet_sayfasi):
+    """Calculate yearly labor cost savings.
+
+    Parameters
+    ----------
+    maliyet_sayfasi : openpyxl.worksheet.worksheet.Worksheet
+        Worksheet containing cost inputs. The result is written to cell
+        ``B14`` of this sheet.
+    """
     # Mevcut maliyet
     mevcut_isci = maliyet_sayfasi['B5'].value or 0
     mevcut_maas = maliyet_sayfasi['B6'].value or 0
@@ -18,6 +26,14 @@ def maliyet_tasarrufu_hesapla(maliyet_sayfasi):
     maliyet_sayfasi['B14'].value = maliyet_tasarrufu  # Yıllık Maliyet Tasarrufu
 
 def verimlilik_artisi_hesapla(verimlilik_sayfasi):
+    """Compute increased production revenue after automation.
+
+    Parameters
+    ----------
+    verimlilik_sayfasi : openpyxl.worksheet.worksheet.Worksheet
+        Worksheet with productivity metrics. The calculated gain is stored in
+        cell ``B20``.
+    """
     # Mevcut verimlilik
     mevcut_kapasite = verimlilik_sayfasi['B5'].value or 0
     mevcut_oee = verimlilik_sayfasi['B6'].value or 0
@@ -37,6 +53,14 @@ def verimlilik_artisi_hesapla(verimlilik_sayfasi):
     verimlilik_sayfasi['B20'].value = verimlilik_geliri  # Yıllık Verimlilik Artışı
 
 def kalite_iyilestirme_hesapla(kalite_sayfasi):
+    """Determine savings from improved quality.
+
+    Parameters
+    ----------
+    kalite_sayfasi : openpyxl.worksheet.worksheet.Worksheet
+        Worksheet holding quality related costs. The computed improvement is
+        placed in cell ``B22``.
+    """
     # Mevcut kalite maliyeti
     mevcut_iade_sayisi = kalite_sayfasi['B5'].value or 0
     mevcut_iade_maliyeti = kalite_sayfasi['B6'].value or 0
