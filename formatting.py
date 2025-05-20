@@ -208,9 +208,15 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'NPV: =TEXT(B24,"#,##0 ₺")'
     )
     chart_sheet.insert_textbox(
-        'B54',
+        'J54',
         kpi_text,
-        {'width': 260, 'height': 110, 'fill': {'color': '#DDEBF7'}, 'font': {'bold': True}}
+        {
+            'width': 300,
+            'height': 120,
+            'fill': {'color': '#DDEBF7'},
+            'font': {'bold': True},
+            'align': {'horizontal': 'center', 'vertical': 'middle'},
+        }
     )
 
 def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
