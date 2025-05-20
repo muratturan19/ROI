@@ -82,7 +82,8 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         sheet.set_row(30, None, percent_format)  # Yıllık İşçilik Maaş Artışı
         
         # Yardımcı sütunlar için biçimlendirme
-        sheet.set_column('D:D', 10)  # Yıl sütunu
+        year_col_format = workbook.add_format({'num_format': '0'})
+        sheet.set_column('D:D', 10, year_col_format)  # Yıl sütunu
         sheet.set_column('E:E', 20, cell_format)  # Yıllık Getiri sütunu
         sheet.set_column('F:F', 20, cell_format)  # Bugünkü Değer sütunu
         
@@ -113,9 +114,9 @@ def sutun_genislikleri_ayarla_xlsxwriter(sheet, workbook=None):
     """Set column widths for the given xlsxwriter worksheet."""
     sheet.set_column('A:A', 40)  # A sütunu genişliği
     sheet.set_column('B:B', 20)  # B sütunu genişliği
-    if sheet.name == "4-Özet ve ROI":
+    if sheet.name == "4-Özet ve ROI" and workbook:
         sheet.set_column('C:C', 10)  # Grafikler için boşluk
-        year_col_format = workbook.add_format({'num_format': '0'}) if workbook else None
+        year_col_format = workbook.add_format({'num_format': '0'})
         sheet.set_column('D:D', 10, year_col_format)  # Yıl sütunu
         sheet.set_column('E:E', 20)  # Yıllık Getiri sütunu
         sheet.set_column('F:F', 20)  # Bugünkü Değer sütunu
@@ -134,9 +135,9 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'categories': ['4-Özet ve ROI', 3, 0, 7, 0],  # başlıklar
         'values': ['4-Özet ve ROI', 3, 1, 7, 1],      # değerler
         'data_labels': {
+            'position': 'outside_end',
             'value': True,
             'percentage': True,
-            'leader_lines': True,
         },
     })
     chart1.set_title({'name': 'Proje Yatırım Maliyetleri'})
@@ -153,8 +154,8 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'line': {'color': '#C0504D'},
     })
     chart2.set_title({'name': 'NPV Eğilimi'})
-    chart2.set_x_axis({'name': 'Yıl'})
-    chart2.set_y_axis({'name': 'Bugünkü Değer (TL)'})
+    chart2.set_x_axis({'name': 'Yıl', 'num_format': '0'})
+    chart2.set_y_axis({'name': 'Bugünkü Değer (TL)', 'num_format': '#,##0 ₺'})
     chart2.set_size({'width': 700, 'height': 500})
     chart_sheet.insert_chart('J2', chart2)
 
@@ -163,8 +164,10 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'name': 'Kümülatif Getiri',
         'categories': ['4-Özet ve ROI', 3, 3, 7, 3],
         'values': ['4-Özet ve ROI', 3, 6, 7, 6],
+        'data_labels': {'value': True},
     })
-    chart_cum.set_y_axis({'name': 'Kümülatif Getiri (TL)'})
+    chart_cum.set_x_axis({'name': 'Yıl', 'num_format': '0'})
+    chart_cum.set_y_axis({'name': 'Kümülatif Getiri (TL)', 'num_format': '#,##0 ₺'})
 
     chart_line = workbook.add_chart({'type': 'line'})
     chart_line.add_series({
@@ -172,6 +175,7 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'categories': ['4-Özet ve ROI', 3, 3, 7, 3],
         'values': ['4-Özet ve ROI', 3, 7, 7, 7],
     })
+    chart_line.set_line({'color': 'red', 'width': 2})
     chart_cum.combine(chart_line)
     chart_cum.set_title({'name': 'Kümülatif Getiri vs Yatırım'})
     chart_cum.set_size({'width': 700, 'height': 500})
