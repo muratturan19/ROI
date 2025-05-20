@@ -1,7 +1,18 @@
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                             QLabel, QPushButton, QTabWidget, QFormLayout, 
-                             QLineEdit, QMessageBox)
-from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QTabWidget,
+    QFormLayout,
+    QLineEdit,
+    QMessageBox,
+    QGroupBox,
+    QStyle,
+)
+from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import Qt
 import sys
 import openpyxl
@@ -46,28 +57,28 @@ class ROIHesaplamaArayuzu(QMainWindow):
 
         # Hesapla Butonu
         hesapla_btn = QPushButton('ROI Hesapla')
-        hesapla_btn.setStyleSheet("""
-            background-color: #4F81BD; 
-            color: white; 
-            padding: 10px;
-            font-weight: bold;
-        """)
+        hesapla_btn.setObjectName('calculateButton')
         hesapla_btn.clicked.connect(self.roi_hesapla)
         layout.addWidget(hesapla_btn)
 
         # Stil
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #F0F0F0;
-            }
-            QLabel {
-                color: #4F81BD;
-                padding: 10px;
-            }
-        """)
+        self.setStyleSheet(
+            """
+            QMainWindow { background-color: #F0F0F0; }
+            QLabel { color: #4F81BD; padding: 5px; }
+            QGroupBox { border: 1px solid #4F81BD; border-radius: 5px; margin-top: 10px; }
+            QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0 3px; color: #4F81BD; font-weight: bold; }
+            QLineEdit { background: #FFFFFF; padding: 3px; }
+            QPushButton#calculateButton { background-color: #4F81BD; color: white; padding: 8px 12px; font-weight: bold; }
+        """
+        )
 
     def sirket_bilgileri_sayfasi(self):
         sayfa = QWidget()
+        ana_layout = QVBoxLayout()
+        sayfa.setLayout(ana_layout)
+
+        grup = QGroupBox("Şirket Bilgileri")
         layout = QFormLayout()
 
         # Şirket bilgileri input alanları
@@ -79,12 +90,19 @@ class ROIHesaplamaArayuzu(QMainWindow):
         layout.addRow("Proje Adı:", self.proje_adi)
         layout.addRow("Yetkili Kişi:", self.yetkili_kisi)
 
-        sayfa.setLayout(layout)
-        self.tab_widget.addTab(sayfa, "Şirket Bilgileri")
+        grup.setLayout(layout)
+        ana_layout.addWidget(grup)
+
+        icon = self.style().standardIcon(QStyle.SP_FileDialogInfoView)
+        self.tab_widget.addTab(sayfa, icon, "Şirket Bilgileri")
 
     def maliyet_tasarrufu_sayfasi(self):
         sayfa = QWidget()
-        layout = QFormLayout()
+        ana_layout = QVBoxLayout()
+        sayfa.setLayout(ana_layout)
+
+        mevcut_grup = QGroupBox("Mevcut Durum")
+        mevcut_layout = QFormLayout()
 
         # Mevcut Durum Input Alanları
         self.mevcut_isci_sayisi = QLineEdit()
@@ -97,26 +115,31 @@ class ROIHesaplamaArayuzu(QMainWindow):
         self.otomasyon_sonrasi_vardiya_sayisi = QLineEdit()
 
         # Mevcut Durum Grubu
-        layout.addRow("🔹 Mevcut Durum", QLabel(""))
-        layout.addRow("Mevcut İşçi Sayısı:", self.mevcut_isci_sayisi)
-        layout.addRow("Ortalama Aylık Maaş:", self.ortalama_maas)
-        layout.addRow("Vardiya Sayısı:", self.mevcut_vardiya_sayisi)
+        mevcut_layout.addRow("Mevcut İşçi Sayısı:", self.mevcut_isci_sayisi)
+        mevcut_layout.addRow("Ortalama Aylık Maaş:", self.ortalama_maas)
+        mevcut_layout.addRow("Vardiya Sayısı:", self.mevcut_vardiya_sayisi)
+        mevcut_grup.setLayout(mevcut_layout)
 
-        # Boşluk
-        layout.addRow("", QLabel(""))
+        otomasyon_grup = QGroupBox("Otomasyon Sonrası")
+        otomasyon_layout = QFormLayout()
+        otomasyon_layout.addRow("İşçi Sayısı:", self.otomasyon_sonrasi_isci_sayisi)
+        otomasyon_layout.addRow("Ortalama Aylık Maaş:", self.otomasyon_sonrasi_maas)
+        otomasyon_layout.addRow("Vardiya Sayısı:", self.otomasyon_sonrasi_vardiya_sayisi)
+        otomasyon_grup.setLayout(otomasyon_layout)
 
-        # Otomasyon Sonrası Grubu
-        layout.addRow("🔹 Otomasyon Sonrası", QLabel(""))
-        layout.addRow("Otomasyon Sonrası İşçi Sayısı:", self.otomasyon_sonrasi_isci_sayisi)
-        layout.addRow("Ortalama Aylık Maaş:", self.otomasyon_sonrasi_maas)
-        layout.addRow("Vardiya Sayısı:", self.otomasyon_sonrasi_vardiya_sayisi)
+        ana_layout.addWidget(mevcut_grup)
+        ana_layout.addWidget(otomasyon_grup)
 
-        sayfa.setLayout(layout)
-        self.tab_widget.addTab(sayfa, "Maliyet Tasarrufu")
+        icon = self.style().standardIcon(QStyle.SP_DriveHDIcon)
+        self.tab_widget.addTab(sayfa, icon, "Maliyet Tasarrufu")
 
     def verimlilik_sayfasi(self):
         sayfa = QWidget()
-        layout = QFormLayout()
+        ana_layout = QVBoxLayout()
+        sayfa.setLayout(ana_layout)
+
+        mevcut_grup = QGroupBox("Mevcut Durum")
+        mevcut_layout = QFormLayout()
 
         # Mevcut Durum Input Alanları
         self.max_kapasite = QLineEdit()
@@ -132,31 +155,37 @@ class ROIHesaplamaArayuzu(QMainWindow):
         self.birim_urun_fiyati = QLineEdit()
 
         # Mevcut Durum Grubu
-        layout.addRow(QLabel("<b>🔹 Mevcut Durum</b>"))
-        layout.addRow("Maksimum Günlük Kapasite (adet/gün):", self.max_kapasite)
-        layout.addRow("OEE (%) :", self.oee_mevcut)
-        layout.addRow("Yıllık Çalışma Günü:", self.calisma_gunu)
+        mevcut_layout.addRow("Maksimum Günlük Kapasite (adet/gün):", self.max_kapasite)
+        mevcut_layout.addRow("OEE (%) :", self.oee_mevcut)
+        mevcut_layout.addRow("Yıllık Çalışma Günü:", self.calisma_gunu)
+        mevcut_grup.setLayout(mevcut_layout)
 
-        # Boşluk
-        layout.addRow("", QLabel(""))
+        otomasyon_grup = QGroupBox("Otomasyon Sonrası")
+        otomasyon_layout = QFormLayout()
+        otomasyon_layout.addRow("Yeni Maksimum Kapasite (adet/gün):", self.otomasyon_sonrasi_max_kapasite)
+        otomasyon_layout.addRow("Yeni OEE (%):", self.otomasyon_sonrasi_oee)
+        otomasyon_layout.addRow("Yeni Yıllık Çalışma Günü:", self.otomasyon_sonrasi_calisma_gunu)
+        otomasyon_grup.setLayout(otomasyon_layout)
 
-        # Otomasyon Sonrası Grubu
-        layout.addRow(QLabel("<b>🔹 Otomasyon Sonrası</b>"))
-        layout.addRow("Yeni Maksimum Kapasite (adet/gün):", self.otomasyon_sonrasi_max_kapasite)
-        layout.addRow("Yeni OEE (%):", self.otomasyon_sonrasi_oee)
-        layout.addRow("Yeni Yıllık Çalışma Günü:", self.otomasyon_sonrasi_calisma_gunu)
+        birim_grup = QGroupBox("Birim Ürün Fiyatı (TL/adet)")
+        birim_layout = QFormLayout()
+        birim_layout.addRow("Ürün Birim Fiyatı (TL):", self.birim_urun_fiyati)
+        birim_grup.setLayout(birim_layout)
 
-        # Birim Ürün Fiyatı
-        layout.addRow("", QLabel(""))
-        layout.addRow(QLabel("<b>🔹 Birim Ürün Fiyatı (TL/adet)</b>"))
-        layout.addRow("Ürün Birim Fiyatı (TL):", self.birim_urun_fiyati)
+        ana_layout.addWidget(mevcut_grup)
+        ana_layout.addWidget(otomasyon_grup)
+        ana_layout.addWidget(birim_grup)
 
-        sayfa.setLayout(layout)
-        self.tab_widget.addTab(sayfa, "Verimlilik")
+        icon = self.style().standardIcon(QStyle.SP_ArrowForward)
+        self.tab_widget.addTab(sayfa, icon, "Verimlilik")
 
     def kalite_sayfasi(self):
         sayfa = QWidget()
-        layout = QFormLayout()
+        ana_layout = QVBoxLayout()
+        sayfa.setLayout(ana_layout)
+
+        mevcut_grup = QGroupBox("Mevcut Durum")
+        mevcut_layout = QFormLayout()
 
         # Mevcut Durum Input Alanları
         self.iade_urun_sayisi = QLineEdit()
@@ -171,24 +200,25 @@ class ROIHesaplamaArayuzu(QMainWindow):
         self.otomasyon_sonrasi_sikayet_maliyeti = QLineEdit()
 
         # Mevcut Durum Grubu
-        layout.addRow("🔹 Mevcut Durum", QLabel(""))
-        layout.addRow("Yıllık İade Ürün Sayısı:", self.iade_urun_sayisi)
-        layout.addRow("Ortalama İade Maliyeti:", self.ortalama_iade_maliyeti)
-        layout.addRow("Yıllık Müşteri Şikayet Sayısı:", self.musteri_sikayet_sayisi)
-        layout.addRow("Ortalama Şikayet Maliyeti:", self.ortalama_sikayet_maliyeti)
+        mevcut_layout.addRow("Yıllık İade Ürün Sayısı:", self.iade_urun_sayisi)
+        mevcut_layout.addRow("Ortalama İade Maliyeti:", self.ortalama_iade_maliyeti)
+        mevcut_layout.addRow("Yıllık Müşteri Şikayet Sayısı:", self.musteri_sikayet_sayisi)
+        mevcut_layout.addRow("Ortalama Şikayet Maliyeti:", self.ortalama_sikayet_maliyeti)
+        mevcut_grup.setLayout(mevcut_layout)
 
-        # Boşluk
-        layout.addRow("", QLabel(""))
+        otomasyon_grup = QGroupBox("Otomasyon Sonrası")
+        otomasyon_layout = QFormLayout()
+        otomasyon_layout.addRow("Yıllık İade Ürün Sayısı:", self.otomasyon_sonrasi_iade_urun_sayisi)
+        otomasyon_layout.addRow("Ortalama İade Maliyeti:", self.otomasyon_sonrasi_iade_maliyeti)
+        otomasyon_layout.addRow("Yıllık Müşteri Şikayet Sayısı:", self.otomasyon_sonrasi_sikayet_sayisi)
+        otomasyon_layout.addRow("Ortalama Şikayet Maliyeti:", self.otomasyon_sonrasi_sikayet_maliyeti)
+        otomasyon_grup.setLayout(otomasyon_layout)
 
-        # Otomasyon Sonrası Grubu
-        layout.addRow("🔹 Otomasyon Sonrası", QLabel(""))
-        layout.addRow("Yıllık İade Ürün Sayısı:", self.otomasyon_sonrasi_iade_urun_sayisi)
-        layout.addRow("Ortalama İade Maliyeti:", self.otomasyon_sonrasi_iade_maliyeti)
-        layout.addRow("Yıllık Müşteri Şikayet Sayısı:", self.otomasyon_sonrasi_sikayet_sayisi)
-        layout.addRow("Ortalama Şikayet Maliyeti:", self.otomasyon_sonrasi_sikayet_maliyeti)
+        ana_layout.addWidget(mevcut_grup)
+        ana_layout.addWidget(otomasyon_grup)
 
-        sayfa.setLayout(layout)
-        self.tab_widget.addTab(sayfa, "Kalite")
+        icon = self.style().standardIcon(QStyle.SP_MessageBoxInformation)
+        self.tab_widget.addTab(sayfa, icon, "Kalite")
 
     def roi_hesapla(self):
         try:
