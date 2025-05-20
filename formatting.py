@@ -1,3 +1,14 @@
+def get_common_styles():
+    """Return base color and font settings shared by both libraries."""
+    return {
+        "header_bg": "4F81BD",
+        "subheader_bg": "B8CCE4",
+        "highlight_bg": "DDEBF7",
+        "border_color": "A0A0A0",
+        "font_name": "Calibri",
+    }
+
+
 def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
     """Apply formatting rules for a worksheet created with xlsxwriter.
 
@@ -8,11 +19,13 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
     workbook : xlsxwriter.Workbook
         Parent workbook used to create style objects.
     """
+    styles = get_common_styles()
+
     # Biçimlendirme formatları
     header_format = workbook.add_format({
         'bold': True,
         'font_color': 'white',
-        'bg_color': '#4F81BD',
+        'bg_color': f"#{styles['header_bg']}",
         'border': 1,
         'font_size': 12,
         'align': 'center',
@@ -39,7 +52,7 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         'font_size': 10,
         'align': 'left',
         'valign': 'vcenter',
-        'bg_color': '#DDEBF7'  # Önemli satırları vurgulamak için açık mavi arka plan
+        'bg_color': f"#{styles['highlight_bg']}"  # Önemli satırları vurgulamak için açık mavi arka plan
     })
     percent_format = workbook.add_format({
         'border': 1,
@@ -48,7 +61,7 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         'align': 'left',
         'valign': 'vcenter',
         'bold': True,
-        'bg_color': '#DDEBF7'
+        'bg_color': f"#{styles['highlight_bg']}"
     })
     year_format = workbook.add_format({
         'border': 1,
@@ -57,7 +70,7 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         'align': 'left',
         'valign': 'vcenter',
         'bold': True,
-        'bg_color': '#DDEBF7'
+        'bg_color': f"#{styles['highlight_bg']}"
     })
     
     # Başlık satırını sabit olarak biçimlendir

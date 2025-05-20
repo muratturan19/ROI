@@ -29,6 +29,7 @@ from calculations import (
     kalite_iyilestirme_hesapla,
 )
 from xlsx_report import create_xlsxwriter_report
+from formatting import get_common_styles
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -473,22 +474,24 @@ class ROIHesaplamaArayuzu(QMainWindow):
 
 def sayfa_bicimlendir(sheet):
     """Apply openpyxl styles to the provided worksheet."""
+    styles = get_common_styles()
+
     # Başlık ve alt başlık stilleri
-    baslik_font = Font(name='Calibri', size=14, bold=True, color="FFFFFF")
-    alt_baslik_font = Font(name='Calibri', size=12, bold=True)
-    normal_font = Font(name='Calibri', size=11)
-    bold_font = Font(name='Calibri', size=11, bold=True)  # Sonuç için kalın font
+    baslik_font = Font(name=styles['font_name'], size=14, bold=True, color="FFFFFF")
+    alt_baslik_font = Font(name=styles['font_name'], size=12, bold=True)
+    normal_font = Font(name=styles['font_name'], size=11)
+    bold_font = Font(name=styles['font_name'], size=11, bold=True)  # Sonuç için kalın font
 
     # Dolgular
-    baslik_dolgu = PatternFill(start_color='4F81BD', end_color='4F81BD', fill_type="solid")
-    alt_baslik_dolgu = PatternFill(start_color='B8CCE4', end_color='B8CCE4', fill_type="solid")
+    baslik_dolgu = PatternFill(start_color=styles['header_bg'], end_color=styles['header_bg'], fill_type="solid")
+    alt_baslik_dolgu = PatternFill(start_color=styles['subheader_bg'], end_color=styles['subheader_bg'], fill_type="solid")
 
     # Kenarlık
     kenarlik = Border(
-        left=Side(style='thin', color='A0A0A0'),
-        right=Side(style='thin', color='A0A0A0'),
-        top=Side(style='thin', color='A0A0A0'),
-        bottom=Side(style='thin', color='A0A0A0')
+        left=Side(style='thin', color=styles['border_color']),
+        right=Side(style='thin', color=styles['border_color']),
+        top=Side(style='thin', color=styles['border_color']),
+        bottom=Side(style='thin', color=styles['border_color'])
     )
 
     # Hücreleri biçimlendir
