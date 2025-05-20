@@ -25,6 +25,13 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         'align': 'left',
         'valign': 'vcenter'
     })
+    number_format = workbook.add_format({
+        'border': 1,
+        'num_format': '#,##0.00',
+        'font_size': 10,
+        'align': 'left',
+        'valign': 'vcenter'
+    })
     bold_format = workbook.add_format({
         'bold': True,
         'border': 1,
@@ -80,9 +87,13 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         sheet.set_column('F:F', 20, cell_format)  # Bugünkü Değer sütunu
         
         # Diğer satırlara varsayılan biçimlendirme
+        currency_rows = {4, 5, 6, 7, 8, 10, 14, 15, 16, 17, 20, 23, 26, 27}
+        special_rows = {3, 9, 13, 16, 19, 21, 22, 23, 24, 25, 26, 28, 29, 30}
         for row in range(1, 50):
-            if row not in [3, 9, 13, 16, 19, 21, 22, 23, 24, 25, 26, 28, 29, 30]:
-                sheet.set_row(row, None, cell_format)
+            if row in special_rows:
+                continue
+            fmt = cell_format if row in currency_rows else number_format
+            sheet.set_row(row, None, fmt)
     elif sheet.name == "5-NPV_ROI Bilgi":
         # NPV_ROI Bilgi sayfası için basit biçimlendirme
         sheet.set_row(0, 30, header_format)
@@ -96,7 +107,7 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
     else:
         # Diğer sayfalar için varsayılan biçimlendirme
         for row in range(1, 50):
-            sheet.set_row(row, None, bold_format if row in [3, 9, 13, 19] else cell_format)
+            sheet.set_row(row, None, bold_format if row in [3, 9, 13, 19] else number_format)
 
 def sutun_genislikleri_ayarla_xlsxwriter(sheet, workbook=None):
     """Set column widths for the given xlsxwriter worksheet."""
