@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QStyle,
 )
-from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtGui import QFont, QIcon, QDoubleValidator
 from PyQt5.QtCore import Qt
 import sys
 import openpyxl
@@ -112,13 +112,19 @@ class ROIHesaplamaArayuzu(QMainWindow):
 
         # Mevcut Durum Input Alanları
         self.mevcut_isci_sayisi = QLineEdit()
+        self.mevcut_isci_sayisi.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.ortalama_maas = QLineEdit()
+        self.ortalama_maas.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.mevcut_vardiya_sayisi = QLineEdit()
+        self.mevcut_vardiya_sayisi.setValidator(QDoubleValidator(0.0, 1e12, 2))
 
         # Otomasyon Sonrası Input Alanları
         self.otomasyon_sonrasi_isci_sayisi = QLineEdit()
+        self.otomasyon_sonrasi_isci_sayisi.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.otomasyon_sonrasi_maas = QLineEdit()
+        self.otomasyon_sonrasi_maas.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.otomasyon_sonrasi_vardiya_sayisi = QLineEdit()
+        self.otomasyon_sonrasi_vardiya_sayisi.setValidator(QDoubleValidator(0.0, 1e12, 2))
 
         # Mevcut Durum Grubu
         mevcut_layout.addRow("Mevcut İşçi Sayısı:", self.mevcut_isci_sayisi)
@@ -150,16 +156,23 @@ class ROIHesaplamaArayuzu(QMainWindow):
 
         # Mevcut Durum Input Alanları
         self.max_kapasite = QLineEdit()
+        self.max_kapasite.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.oee_mevcut = QLineEdit()
+        self.oee_mevcut.setValidator(QDoubleValidator(0.0, 100.0, 2))
         self.calisma_gunu = QLineEdit()
+        self.calisma_gunu.setValidator(QDoubleValidator(0.0, 366.0, 0))
 
         # Otomasyon Sonrası Input Alanları
         self.otomasyon_sonrasi_max_kapasite = QLineEdit()
+        self.otomasyon_sonrasi_max_kapasite.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.otomasyon_sonrasi_oee = QLineEdit()
+        self.otomasyon_sonrasi_oee.setValidator(QDoubleValidator(0.0, 100.0, 2))
         self.otomasyon_sonrasi_calisma_gunu = QLineEdit()
+        self.otomasyon_sonrasi_calisma_gunu.setValidator(QDoubleValidator(0.0, 366.0, 0))
 
         # Birim Ürün Fiyatı
         self.birim_urun_fiyati = QLineEdit()
+        self.birim_urun_fiyati.setValidator(QDoubleValidator(0.0, 1e12, 2))
 
         # Mevcut Durum Grubu
         mevcut_layout.addRow("Maksimum Günlük Kapasite (adet/gün):", self.max_kapasite)
@@ -197,15 +210,23 @@ class ROIHesaplamaArayuzu(QMainWindow):
 
         # Mevcut Durum Input Alanları
         self.iade_urun_sayisi = QLineEdit()
+        self.iade_urun_sayisi.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.ortalama_iade_maliyeti = QLineEdit()
+        self.ortalama_iade_maliyeti.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.musteri_sikayet_sayisi = QLineEdit()
+        self.musteri_sikayet_sayisi.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.ortalama_sikayet_maliyeti = QLineEdit()
+        self.ortalama_sikayet_maliyeti.setValidator(QDoubleValidator(0.0, 1e12, 2))
 
         # Otomasyon Sonrası Input Alanları
         self.otomasyon_sonrasi_iade_urun_sayisi = QLineEdit()
+        self.otomasyon_sonrasi_iade_urun_sayisi.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.otomasyon_sonrasi_iade_maliyeti = QLineEdit()
+        self.otomasyon_sonrasi_iade_maliyeti.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.otomasyon_sonrasi_sikayet_sayisi = QLineEdit()
+        self.otomasyon_sonrasi_sikayet_sayisi.setValidator(QDoubleValidator(0.0, 1e12, 2))
         self.otomasyon_sonrasi_sikayet_maliyeti = QLineEdit()
+        self.otomasyon_sonrasi_sikayet_maliyeti.setValidator(QDoubleValidator(0.0, 1e12, 2))
 
         # Mevcut Durum Grubu
         mevcut_layout.addRow("Yıllık İade Ürün Sayısı:", self.iade_urun_sayisi)
@@ -227,6 +248,20 @@ class ROIHesaplamaArayuzu(QMainWindow):
 
         icon = self.style().standardIcon(QStyle.SP_MessageBoxInformation)
         self.tab_widget.addTab(sayfa, icon, "Kalite")
+
+    def _to_float(self, line_edit: QLineEdit) -> float:
+        """Return the numeric value of a QLineEdit or zero.
+
+        Displays a warning and returns 0.0 if conversion fails.
+        """
+        text = line_edit.text()
+        if not text:
+            return 0.0
+        try:
+            return float(text)
+        except ValueError:
+            QMessageBox.warning(self, "Geçersiz Giriş", f"'{text}' sayısal bir değer değil.")
+            return 0.0
 
     def roi_hesapla(self):
         """Collect user inputs, perform calculations and export the report."""
@@ -283,37 +318,37 @@ class ROIHesaplamaArayuzu(QMainWindow):
 
             # Verileri doldur
             maliyet_sayfasi = wb["1-Maliyet Tasarrufu"]
-            maliyet_sayfasi['B5'].value = float(self.mevcut_isci_sayisi.text() or 0)
-            maliyet_sayfasi['B6'].value = float(self.ortalama_maas.text() or 0)
-            maliyet_sayfasi['B7'].value = float(self.mevcut_vardiya_sayisi.text() or 0)
+            maliyet_sayfasi['B5'].value = self._to_float(self.mevcut_isci_sayisi)
+            maliyet_sayfasi['B6'].value = self._to_float(self.ortalama_maas)
+            maliyet_sayfasi['B7'].value = self._to_float(self.mevcut_vardiya_sayisi)
 
-            maliyet_sayfasi['B11'].value = float(self.otomasyon_sonrasi_isci_sayisi.text() or 0)
-            maliyet_sayfasi['B12'].value = float(self.otomasyon_sonrasi_maas.text() or 0)
-            maliyet_sayfasi['B13'].value = float(self.otomasyon_sonrasi_vardiya_sayisi.text() or 0)
+            maliyet_sayfasi['B11'].value = self._to_float(self.otomasyon_sonrasi_isci_sayisi)
+            maliyet_sayfasi['B12'].value = self._to_float(self.otomasyon_sonrasi_maas)
+            maliyet_sayfasi['B13'].value = self._to_float(self.otomasyon_sonrasi_vardiya_sayisi)
 
             # Verimlilik Sayfası Verileri
             verimlilik_sayfasi = wb["2-Verimlilik Artışı"]
-            verimlilik_sayfasi['B5'].value = float(self.max_kapasite.text() or 0)
-            verimlilik_sayfasi['B6'].value = float(self.oee_mevcut.text() or 0) / 100  # OEE yüzdesi oran olarak kaydedilecek
-            verimlilik_sayfasi['B7'].value = float(self.calisma_gunu.text() or 0)
+            verimlilik_sayfasi['B5'].value = self._to_float(self.max_kapasite)
+            verimlilik_sayfasi['B6'].value = self._to_float(self.oee_mevcut) / 100
+            verimlilik_sayfasi['B7'].value = self._to_float(self.calisma_gunu)
 
-            verimlilik_sayfasi['B10'].value = float(self.otomasyon_sonrasi_max_kapasite.text() or 0)
-            verimlilik_sayfasi['B11'].value = float(self.otomasyon_sonrasi_oee.text() or 0) / 100  # OEE yüzdesi oran olarak kaydedilecek
-            verimlilik_sayfasi['B12'].value = float(self.otomasyon_sonrasi_calisma_gunu.text() or 0)
+            verimlilik_sayfasi['B10'].value = self._to_float(self.otomasyon_sonrasi_max_kapasite)
+            verimlilik_sayfasi['B11'].value = self._to_float(self.otomasyon_sonrasi_oee) / 100
+            verimlilik_sayfasi['B12'].value = self._to_float(self.otomasyon_sonrasi_calisma_gunu)
 
-            verimlilik_sayfasi['B15'].value = float(self.birim_urun_fiyati.text() or 0)
+            verimlilik_sayfasi['B15'].value = self._to_float(self.birim_urun_fiyati)
 
             # Kalite sayfası verileri
             kalite_sayfasi = wb["3-Kalite İyileştirme"]
-            kalite_sayfasi['B5'].value = float(self.iade_urun_sayisi.text() or 0)
-            kalite_sayfasi['B6'].value = float(self.ortalama_iade_maliyeti.text() or 0)
-            kalite_sayfasi['B7'].value = float(self.musteri_sikayet_sayisi.text() or 0)
-            kalite_sayfasi['B8'].value = float(self.ortalama_sikayet_maliyeti.text() or 0)
+            kalite_sayfasi['B5'].value = self._to_float(self.iade_urun_sayisi)
+            kalite_sayfasi['B6'].value = self._to_float(self.ortalama_iade_maliyeti)
+            kalite_sayfasi['B7'].value = self._to_float(self.musteri_sikayet_sayisi)
+            kalite_sayfasi['B8'].value = self._to_float(self.ortalama_sikayet_maliyeti)
 
-            kalite_sayfasi['B11'].value = float(self.otomasyon_sonrasi_iade_urun_sayisi.text() or 0)
-            kalite_sayfasi['B12'].value = float(self.otomasyon_sonrasi_iade_maliyeti.text() or 0)
-            kalite_sayfasi['B13'].value = float(self.otomasyon_sonrasi_sikayet_sayisi.text() or 0)
-            kalite_sayfasi['B14'].value = float(self.otomasyon_sonrasi_sikayet_maliyeti.text() or 0)
+            kalite_sayfasi['B11'].value = self._to_float(self.otomasyon_sonrasi_iade_urun_sayisi)
+            kalite_sayfasi['B12'].value = self._to_float(self.otomasyon_sonrasi_iade_maliyeti)
+            kalite_sayfasi['B13'].value = self._to_float(self.otomasyon_sonrasi_sikayet_sayisi)
+            kalite_sayfasi['B14'].value = self._to_float(self.otomasyon_sonrasi_sikayet_maliyeti)
 
             # Özet ve ROI sayfasını tanımla
             ozet_sayfasi = wb["4-Özet ve ROI"]
