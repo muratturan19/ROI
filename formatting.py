@@ -122,10 +122,15 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'name': 'Proje Yatırım Maliyetleri',
         'categories': ['4-Özet ve ROI', 3, 0, 7, 0],  # başlıklar
         'values': ['4-Özet ve ROI', 3, 1, 7, 1],      # değerler
-        'data_labels': {'value': True, 'percentage': True},
+        'data_labels': {
+            'value': True,
+            'percentage': True,
+            'leader_lines': True,
+        },
     })
     chart1.set_title({'name': 'Proje Yatırım Maliyetleri'})
     chart1.set_style(10)
+    chart1.set_size({'width': 400, 'height': 300})
     chart_sheet.insert_chart('B2', chart1)
     
     # 2. Grafik: Bugünkü Değerlerin Eğilimi (Line Chart)
