@@ -22,7 +22,11 @@ from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.chart import BarChart, Reference
 from openpyxl.chart.label import DataLabelList
 from data_templates import ozet_roi_data, maliyet_tasarrufu_data, verimlilik_artisi_data, kalite_iyilestirme_data, npv_roi_bilgi_data
-from calculations import maliyet_tasarrufu_hesapla, verimlilik_artisi_hesapla, kalite_iyilestirme_hesapla, roi_hesapla
+from calculations import (
+    maliyet_tasarrufu_hesapla,
+    verimlilik_artisi_hesapla,
+    kalite_iyilestirme_hesapla,
+)
 from xlsx_report import create_xlsxwriter_report
 
 class ROIHesaplamaArayuzu(QMainWindow):
@@ -406,7 +410,6 @@ class ROIHesaplamaArayuzu(QMainWindow):
             maliyet_tasarrufu_hesapla(maliyet_sayfasi)
             verimlilik_artisi_hesapla(verimlilik_sayfasi)
             kalite_iyilestirme_hesapla(kalite_sayfasi)
-            roi_hesapla(ozet_sayfasi, wb)
 
             # Özet ve ROI sayfasına GUI’den gelen değerleri taşı
             ozet_sayfasi['B15'].value = maliyet_sayfasi['B14'].value  # Yıllık Maliyet Tasarrufu
