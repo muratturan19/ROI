@@ -138,6 +138,25 @@ def grafik_ekle_xlsxwriter(workbook):
     chart2.set_size({'width': 350, 'height': 250})
     ozet_sayfasi.insert_chart('H20', chart2)
 
+    chart_cum = workbook.add_chart({'type': 'column'})
+    chart_cum.add_series({
+        'name': 'Kümülatif Getiri',
+        'categories': ['4-Özet ve ROI', 3, 3, 7, 3],
+        'values': ['4-Özet ve ROI', 3, 6, 7, 6],
+    })
+    chart_cum.set_y_axis({'name': 'Kümülatif Getiri (TL)'})
+
+    chart_line = workbook.add_chart({'type': 'line'})
+    chart_line.add_series({
+        'name': 'Toplam Yatırım',
+        'categories': ['4-Özet ve ROI', 3, 3, 7, 3],
+        'values': ['4-Özet ve ROI', 3, 7, 7, 7],
+    })
+    chart_cum.combine(chart_line)
+    chart_cum.set_title({'name': 'Kümülatif Getiri vs Yatırım'})
+    chart_cum.set_size({'width': 350, 'height': 250})
+    ozet_sayfasi.insert_chart('H36', chart_cum)
+
 def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
     """Placeholder for a detailed ROI calculation."""
     pass

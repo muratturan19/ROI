@@ -56,6 +56,11 @@ def create_xlsxwriter_report(filename="roi_report_xlsxwriter.xlsx"):
         summary.write_formula("F6", "=E6/(1+B32)^2")
         summary.write_formula("F7", "=E7/(1+B32)^3")
         summary.write_formula("F8", "=E8/(1+B32)^4")
+        summary.write_formula("G4", "=E4")
+        for r in range(5, 9):
+            summary.write_formula(f"G{r}", f"=G{r-1}+E{r}")
+        for r in range(4, 9):
+            summary.write_formula(f"H{r}", "=B11")
         summary.write_formula("B24", "=SUM(F4:INDEX(F4:F8,B33))-B11")
         summary.write_formula("B27", "=IF(B11>0,B11*(1+B32)^B33,0)")
         summary.write_formula(
