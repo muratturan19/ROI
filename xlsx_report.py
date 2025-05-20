@@ -189,7 +189,7 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
             charts.write("A1", "Otomasyon NPV")
             charts.write_formula("B1", "='4-Özet ve ROI'!B24")
             charts.write("A2", "Banka NPV")
-            charts.write_formula("B2", "='4-Özet ve ROI'!B26")
+            charts.write_formula("B2", "='4-Özet ve ROI'!B28")
 
         summary.conditional_format("B22", {"type": "3_color_scale"})
         summary.conditional_format("B23", {"type": "data_bar", "bar_color": "#63C384"})
