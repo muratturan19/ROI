@@ -170,14 +170,14 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     chart_npv = workbook.add_chart({'type': 'column'})
     chart_npv.add_series({
         'name': 'Otomasyon NPV',
-        'categories': [chart_sheet_name, 0, 0, 1, 0],
-        'values':     [chart_sheet_name, 0, 1, 1, 1],
+        'categories': [chart_sheet_name, 0, 0, 0, 0],  # A1
+        'values':     [chart_sheet_name, 0, 1, 0, 1],  # B1
         'fill': {'color': '#63C384'},
     })
     chart_npv.add_series({
         'name': 'Banka NPV',
-        'categories': [chart_sheet_name, 0, 0, 1, 0],
-        'values':     [chart_sheet_name, 0, 1, 1, 1],
+        'categories': [chart_sheet_name, 1, 0, 1, 0],  # A2
+        'values':     [chart_sheet_name, 1, 1, 1, 1],  # B2
         'fill': {'color': '#BFBFBF'},
     })
     chart_npv.set_title({'name': 'NPV Karşılaştırması'})
