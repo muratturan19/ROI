@@ -101,7 +101,7 @@ kalite_iyilestirme_data = [
     [],
     ["🔹 Sonuç"],
     [],
-    ["Yıllık Kalite İyileştirme (TL)", 0]
+    ["Yıllık Kalite İyileştirme (TL)", "=(B5*B6+B7*B8)-(B12*B13+B14*B15)"]
 ]
 
 # NPV ve ROI Bilgi Şablonu
