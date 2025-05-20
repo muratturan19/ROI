@@ -176,6 +176,19 @@ def grafik_ekle_xlsxwriter(workbook):
     chart_npv.set_size({'width': 350, 'height': 250})
     ozet_sayfasi.insert_chart('H52', chart_npv)
 
+    # Highlight key performance indicators in a textbox
+    kpi_text = (
+        'ROI: =TEXT(B22,"0.00%")\n'
+        'Geri Ödeme: =TEXT(B23,"0.0 \\"yıl\\"")\n'
+        'Toplam Getiri: =TEXT(B18,"#,##0 ₺")\n'
+        'NPV: =TEXT(B24,"#,##0 ₺")'
+    )
+    ozet_sayfasi.insert_textbox(
+        'H66',
+        kpi_text,
+        {'width': 260, 'height': 110, 'fill': {'color': '#DDEBF7'}, 'font': {'bold': True}}
+    )
+
 def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
     """Placeholder for a detailed ROI calculation."""
     pass
