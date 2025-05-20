@@ -141,7 +141,7 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     })
     chart1.set_title({'name': 'Proje Yatırım Maliyetleri'})
     chart1.set_style(10)
-    chart1.set_size({'width': 400, 'height': 300})
+    chart1.set_size({'width': 700, 'height': 500})
     chart_sheet.insert_chart('B2', chart1)
     
     # 2. Grafik: Bugünkü Değerlerin Eğilimi (Line Chart)
@@ -155,8 +155,8 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     chart2.set_title({'name': 'NPV Eğilimi'})
     chart2.set_x_axis({'name': 'Yıl'})
     chart2.set_y_axis({'name': 'Bugünkü Değer (TL)'})
-    chart2.set_size({'width': 350, 'height': 250})
-    chart_sheet.insert_chart('B18', chart2)
+    chart2.set_size({'width': 700, 'height': 500})
+    chart_sheet.insert_chart('J2', chart2)
 
     chart_cum = workbook.add_chart({'type': 'column'})
     chart_cum.add_series({
@@ -174,8 +174,8 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     })
     chart_cum.combine(chart_line)
     chart_cum.set_title({'name': 'Kümülatif Getiri vs Yatırım'})
-    chart_cum.set_size({'width': 350, 'height': 250})
-    chart_sheet.insert_chart('B34', chart_cum)
+    chart_cum.set_size({'width': 700, 'height': 500})
+    chart_sheet.insert_chart('B28', chart_cum)
 
     # 4. Grafik: Otomasyon ve Banka NPV Karşılaştırması
     chart_npv = workbook.add_chart({'type': 'column'})
@@ -193,8 +193,8 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     })
     chart_npv.set_title({'name': 'NPV Karşılaştırması'})
     chart_npv.set_y_axis({'name': 'NPV (TL)'})
-    chart_npv.set_size({'width': 350, 'height': 250})
-    chart_sheet.insert_chart('B50', chart_npv)
+    chart_npv.set_size({'width': 700, 'height': 500})
+    chart_sheet.insert_chart('J28', chart_npv)
 
     # Highlight key performance indicators in a textbox
     kpi_text = (
@@ -204,7 +204,7 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'NPV: =TEXT(B24,"#,##0 ₺")'
     )
     chart_sheet.insert_textbox(
-        'B64',
+        'B54',
         kpi_text,
         {'width': 260, 'height': 110, 'fill': {'color': '#DDEBF7'}, 'font': {'bold': True}}
     )
