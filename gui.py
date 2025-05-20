@@ -18,6 +18,7 @@ from PyQt5.QtCore import Qt
 import sys
 import openpyxl
 from datetime import datetime
+import logging
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.chart import BarChart, Reference
 from openpyxl.chart.label import DataLabelList
@@ -28,6 +29,8 @@ from calculations import (
     kalite_iyilestirme_hesapla,
 )
 from xlsx_report import create_xlsxwriter_report
+
+logging.basicConfig(level=logging.ERROR)
 
 class ROIHesaplamaArayuzu(QMainWindow):
     """Main window providing forms to collect ROI parameters."""
@@ -532,8 +535,10 @@ def sutun_genislikleri_ayarla(sheet):
                 if cell.value:
                     cell_length = len(str(cell.value))
                     max_length = max(max_length, cell_length)
-            except:
-                pass
+            except Exception as e:
+                logging.exception(
+                    f"Error processing cell {cell.coordinate} in '{sheet.title}': {e}"
+                )
 
         adjusted_width = (max_length + 2)
         sheet.column_dimensions[column_letter].width = adjusted_width
