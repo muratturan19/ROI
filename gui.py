@@ -411,7 +411,7 @@ class ROIHesaplamaArayuzu(QMainWindow):
             # B sütunundaki formülleri ekle
             ozet_sayfasi['B18'].value = '=SUM(B15:B17)'  # Toplam Yıllık Getiri
             ozet_sayfasi['B21'].value = '=B11'  # Toplam Yatırım Maliyeti (Finansal Analiz)
-            ozet_sayfasi['B22'].value = '=IF(B11>0,(B18/B11)*100,0)'  # ROI (%)
+            ozet_sayfasi['B22'].value = '=IF(B11>0,B18/B11,0)'  # ROI (%)
             ozet_sayfasi['B23'].value = '=IF(B18>0,B11/B18,0)'  # Geri Ödeme Süresi
 
             # Yardımcı sütunlar (D, E, F) ekle

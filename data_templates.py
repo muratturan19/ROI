@@ -23,7 +23,7 @@ ozet_roi_data = [
     [],
     ["🔹 Finansal Analiz"],
     ["Toplam Yatırım Maliyeti (TL)", "=B11"],
-    ["ROI (%)", "=IF(B11>0,(B18/B11)*100,0)"],
+    ["ROI (%)", "=IF(B11>0,B18/B11,0)"],
     ["Geri Ödeme Süresi (Yıl)", "=IF(B18>0,B11/B18,0)"],
     ["Net Bugünkü Değer (NPV) (TL)", "=SUM(F4:INDEX(F4:F8,B32))-B11"],
     [],
