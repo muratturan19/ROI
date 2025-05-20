@@ -60,7 +60,7 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
         sheet = workbook.add_worksheet(sheet_name)
         for r, row in enumerate(tpl):
             sheet.write_row(r, 0, row)
-        sutun_genislikleri_ayarla_xlsxwriter(sheet)
+        sutun_genislikleri_ayarla_xlsxwriter(sheet, workbook)
         sayfa_bicimlendir_xlsxwriter(sheet, workbook)
 
     # Ana sayfa bilgileri
