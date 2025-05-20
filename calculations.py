@@ -56,5 +56,63 @@ def kalite_iyilestirme_hesapla(kalite_sayfasi):
     kalite_sayfasi['B22'].value = kalite_iyilestirme  # Yıllık Kalite İyileştirme
 
 def roi_hesapla(ozet_sayfasi, wb):
-    # ROI hesaplamaları zaten Excel formülleriyle yapılıyor
-    pass
+    """Calculate ROI related figures and update the summary sheet.
+
+    This replicates the formulas that are inserted into the workbook so that the
+    sheet contains actual numeric values.  The function reads the required
+    inputs from ``ozet_sayfasi`` and writes the calculated results back to the
+    same sheet.
+    """
+
+    # Toplam yatırım maliyeti (B5:B9)
+    toplam_yatirim = sum(ozet_sayfasi[f"B{i}"].value or 0 for i in range(5, 10))
+    ozet_sayfasi["B11"].value = toplam_yatirim
+
+    # Yıllık getiriler
+    maliyet_tasarrufu = ozet_sayfasi["B15"].value or 0
+    verimlilik_artisi = ozet_sayfasi["B16"].value or 0
+    kalite_iyilestirme = ozet_sayfasi["B17"].value or 0
+    toplam_getiri = maliyet_tasarrufu + verimlilik_artisi + kalite_iyilestirme
+    ozet_sayfasi["B18"].value = toplam_getiri
+
+    # Finansal analiz
+    ozet_sayfasi["B21"].value = toplam_yatirim
+    roi = (toplam_getiri / toplam_yatirim * 100) if toplam_yatirim else 0
+    ozet_sayfasi["B22"].value = roi
+    geri_odeme = (toplam_yatirim / toplam_getiri) if toplam_getiri else 0
+    ozet_sayfasi["B23"].value = geri_odeme
+
+    # Parametreler
+    iskonto_orani = ozet_sayfasi["B32"].value or 0
+    analiz_suresi = int(ozet_sayfasi["B33"].value or 0)
+    maas_artisi = ozet_sayfasi["B34"].value or 0
+
+    # Yıllık getirileri (E sütunu) ve bugünkü değerleri (F sütunu) hesapla
+    yillik_getiriler = [toplam_getiri]
+    for _ in range(1, 5):
+        yillik_getiriler.append(yillik_getiriler[-1] * (1 + maas_artisi))
+
+    bugunku_degerler = []
+    for i, deger in enumerate(yillik_getiriler):
+        ozet_sayfasi[f"E{i + 4}"].value = deger
+        if i == 0:
+            pv = deger
+        else:
+            pv = deger / ((1 + iskonto_orani) ** i)
+        ozet_sayfasi[f"F{i + 4}"].value = pv
+        bugunku_degerler.append(pv)
+
+    # NPV hesapla (analiz süresi kadar yıl kullanılır)
+    npv = sum(bugunku_degerler[:analiz_suresi]) - toplam_yatirim
+    ozet_sayfasi["B24"].value = npv
+
+    if toplam_yatirim > 0:
+        banka_getiri = toplam_yatirim * ((1 + iskonto_orani) ** analiz_suresi)
+        ozet_sayfasi["B27"].value = banka_getiri
+        banka_npv = banka_getiri / ((1 + iskonto_orani) ** analiz_suresi) - sum(
+            bugunku_degerler[:analiz_suresi]
+        )
+        ozet_sayfasi["B28"].value = banka_npv
+    else:
+        ozet_sayfasi["B27"].value = 0
+        ozet_sayfasi["B28"].value = 0
