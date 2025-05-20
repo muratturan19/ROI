@@ -155,7 +155,7 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
         summary.write_formula("B18", "=SUM(B15:B17)")
         summary.write_formula("B11", "=SUM(B5:B9)")
         summary.write_formula("B21", "=B11")
-        summary.write_formula("B22", "=IF(B11>0,(B18/B11)*100,0)")
+        summary.write_formula("B22", "=IF(B11>0,B18/B11,0)")
         summary.write_formula("B23", "=IF(B18>0,B11/B18,0)")
 
         for i in range(5):
