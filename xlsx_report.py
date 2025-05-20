@@ -19,6 +19,8 @@ from formatting import (
 def create_xlsxwriter_report(filename="roi_report_xlsxwriter.xlsx"):
     """Create a workbook using xlsxwriter and apply advanced formatting."""
     workbook = xlsxwriter.Workbook(filename)
+    # Sheet to host all generated charts
+    workbook.add_worksheet("Grafikler")
 
     templates = [
         ("1-Maliyet Tasarrufu", maliyet_tasarrufu_data),
@@ -68,16 +70,18 @@ def create_xlsxwriter_report(filename="roi_report_xlsxwriter.xlsx"):
             "=IF(B11>0,B27/(1+B32)^B33-SUM(F4:INDEX(F4:F8,B33)),0)",
         )
 
-        # Helper cells for NPV comparison chart
-        summary.write("G52", "Otomasyon NPV")
-        summary.write_formula("H52", "=B24")
-        summary.write("G53", "Banka NPV")
-        summary.write_formula("H53", "=B26")
+        # Helper cells for NPV comparison chart now stored on "Grafikler" sheet
+        charts = workbook.get_worksheet_by_name("Grafikler")
+        if charts:
+            charts.write("A1", "Otomasyon NPV")
+            charts.write_formula("B1", "='4-Özet ve ROI'!B24")
+            charts.write("A2", "Banka NPV")
+            charts.write_formula("B2", "='4-Özet ve ROI'!B26")
 
         summary.conditional_format("B22", {"type": "3_color_scale"})
         summary.conditional_format("B23", {"type": "data_bar", "bar_color": "#63C384"})
 
-    grafik_ekle_xlsxwriter(workbook)
+    grafik_ekle_xlsxwriter(workbook, "Grafikler")
     workbook.close()
 
 
