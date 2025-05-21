@@ -178,7 +178,7 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
         for r in range(4, 9):
             summary.write_formula(f"H{r}", "=B11")
         summary.write_formula("B24", "=SUM(F4:INDEX(F4:F8,B33))-B11")
-        summary.write_formula("B27", "=IF(B11>0,B11*(1+B32)^B33,0)")
+        summary.write_formula("B27", "=IF(B11>0,B11*(1+B31)^B32,0)")
         summary.write_formula(
             "B28",
             "=IF(B11>0,B27/(1+B31)^B32-B11,0)",
