@@ -170,7 +170,7 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     chart2.set_x_axis({'name': 'Yıl', 'num_format': '0'})
     chart2.set_y_axis({'name': 'Bugünkü Değer (TL)', 'num_format': '#,##0 ₺'})
     chart2.set_size({'width': 700, 'height': 500})
-    chart_sheet.insert_chart('J2', chart2)
+    chart_sheet.insert_chart('M2', chart2)
 
     chart_cum = workbook.add_chart({'type': 'column'})
     chart_cum.add_series({
@@ -211,7 +211,7 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     chart_npv.set_title({'name': 'NPV Karşılaştırması'})
     chart_npv.set_y_axis({'name': 'NPV (TL)'})
     chart_npv.set_size({'width': 700, 'height': 500})
-    chart_sheet.insert_chart('J28', chart_npv)
+    chart_sheet.insert_chart('M28', chart_npv)
 
     # Highlight key performance indicators in a textbox
     kpi_text = (
@@ -221,7 +221,7 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'NPV: =TEXT(B24,"#,##0 ₺")'
     )
     chart_sheet.insert_textbox(
-        'J54',
+        'M54',
         kpi_text,
         {
             'width': 300,
