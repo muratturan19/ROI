@@ -319,6 +319,6 @@ def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
     _write("B22", roi)
     _write("B23", geri_odeme)
     _write("B24", npv)
-    _write("B27", banka_getiri)
-    _write("B28", banka_npv)
+    # Cells B27 and B28 contain formulas in the template. Let Excel evaluate
+    # them instead of writing calculated values here.
 
