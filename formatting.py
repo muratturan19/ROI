@@ -316,9 +316,12 @@ def roi_detay_hesapla(sheet, toplam_yatirim, toplam_getiri):
             sheet.cell(row=row, column=7, value=kümülatif[idx])
             sheet.cell(row=row, column=8, value=toplam_yatirim)
 
-    _write("B22", roi)
-    _write("B23", geri_odeme)
-    _write("B24", npv)
+    # Cells B22, B23 and B24 already contain formulas in the template. Leave
+    # them untouched so Excel can recalculate the results whenever dependent
+    # values change.
+    # _write("B22", roi)
+    # _write("B23", geri_odeme)
+    # _write("B24", npv)
     # Cells B27 and B28 contain formulas in the template. Let Excel evaluate
     # them instead of writing calculated values here.
 
