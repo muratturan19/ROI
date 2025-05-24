@@ -12,24 +12,24 @@ ozet_roi_data = [
     ["Altyapı Değişiklikleri", 5000],
     ["Diğer Maliyetler", 45000],
     [],
-    ["Toplam Yatırım Maliyeti (TL)", "=SUM(B5:B9)"],
+    ["Toplam Yatırım Maliyeti", "=SUM(B5:B9)"],
     [],
     ["🔹 Yıllık Getiriler"],
     [],
-    ["Yıllık Maliyet Tasarrufu (TL)", 0],
-    ["Yıllık Verimlilik Artışı (TL)", 0],
-    ["Yıllık Kalite İyileştirme (TL)", 0],
-    ["Toplam Yıllık Getiri (TL)", "=SUM(B15:B17)"],
+    ["Yıllık Maliyet Tasarrufu", 0],
+    ["Yıllık Verimlilik Artışı", 0],
+    ["Yıllık Kalite İyileştirme", 0],
+    ["Toplam Yıllık Getiri", "=SUM(B15:B17)"],
     [],
     ["🔹 Finansal Analiz"],
-    ["Toplam Yatırım Maliyeti (TL)", "=B11"],
+    ["Toplam Yatırım Maliyeti", "=B11"],
     ["ROI (%)", "=IF(B11>0,B18/B11,0)"],
     ["Geri Ödeme Süresi (Yıl)", "=IF(B18>0,B11/B18,0)"],
-    ["Net Bugünkü Değer (NPV) (TL)", "=SUM(F4:INDEX(F4:F8,B33))-B11"],
+    ["Net Bugünkü Değer (NPV)", "=SUM(F4:INDEX(F4:F8,B33))-B11"],
     [],
     ["🔹 Alternatif Senaryo (Banka Faizi)"],
-    ["Banka Faizi ile Elde Edilecek Getiri (TL)", "=IF(B11>0,B11*(1+B32)^B33,0)"],
-    ["Banka Faizi NPV (TL)", "=SUM(OFFSET(I3,1,0,B33,1))-B11"],
+    ["Banka Faizi ile Elde Edilecek Getiri", "=IF(B11>0,B11*(1+B32)^B33,0)"],
+    ["Banka Faizi NPV", "=SUM(OFFSET(I3,1,0,B33,1))-B11"],
     [],
     [],
     ["🔹 Parametreler"],
@@ -53,7 +53,7 @@ maliyet_tasarrufu_data = [
     ["Otomasyon Sonrası İşçi Sayısı", 0],
     ["Ortalama Aylık Maaş", 0],
     ["Vardiya Sayısı", 0],
-    ["Yıllık Maliyet Tasarrufu (TL)", 0]
+    ["Yıllık Maliyet Tasarrufu", 0]
 ]
 
 # Verimlilik Artışı Şablonu
@@ -72,13 +72,13 @@ verimlilik_artisi_data = [
     ["Yeni OEE (%)", 0],
     ["Yeni Yıllık Çalışma Günü", 0],
     [],
-    ["🔹 Birim Ürün Fiyatı (TL/adet)"],
+    ["🔹 Birim Ürün Fiyatı"],
     [],
-    ["Ürün Birim Fiyatı (TL)", 0],
+    ["Ürün Birim Fiyatı", 0],
     [],
     ["🔹 Sonuç"],
     [],
-    ["Yıllık Verimlilik Artışı (TL)", 0]
+    ["Yıllık Verimlilik Artışı", 0]
 ]
 
 # Kalite İyileştirme Şablonu
@@ -101,7 +101,7 @@ kalite_iyilestirme_data = [
     [],
     ["🔹 Sonuç"],
     [],
-    ["Yıllık Kalite İyileştirme (TL)", "=(B5*B6+B7*B8)-(B12*B13+B14*B15)"]
+    ["Yıllık Kalite İyileştirme", "=(B5*B6+B7*B8)-(B12*B13+B14*B15)"]
 ]
 
 # NPV ve ROI Bilgi Şablonu
