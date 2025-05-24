@@ -95,7 +95,7 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         sheet.set_row(30, None, percent_format)  # Yıllık İşçilik Maaş Artışı
         
         # Yardımcı sütunlar için biçimlendirme
-        year_col_format = workbook.add_format({'num_format': '0'})
+        year_col_format = workbook.add_format({'num_format': '0 "yıl"'})
         sheet.set_column('D:D', 10, year_col_format)  # Yıl sütunu
         sheet.set_column('E:E', 20, cell_format)  # Yıllık Getiri sütunu
         sheet.set_column('F:F', 20, cell_format)  # Bugünkü Değer sütunu
@@ -129,7 +129,7 @@ def sutun_genislikleri_ayarla_xlsxwriter(sheet, workbook=None):
     sheet.set_column('B:B', 20)  # B sütunu genişliği
     if sheet.name == "4-Özet ve ROI" and workbook:
         sheet.set_column('C:C', 10)  # Grafikler için boşluk
-        year_col_format = workbook.add_format({'num_format': '0'})
+        year_col_format = workbook.add_format({'num_format': '0 "yıl"'})
         sheet.set_column('D:D', 10, year_col_format)  # Yıl sütunu
         sheet.set_column('E:E', 20)  # Yıllık Getiri sütunu
         sheet.set_column('F:F', 20)  # Bugünkü Değer sütunu
