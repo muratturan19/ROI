@@ -29,7 +29,7 @@ ozet_roi_data = [
     [],
     ["🔹 Alternatif Senaryo (Banka Faizi)"],
     ["Banka Faizi ile Elde Edilecek Getiri (TL)", "=IF(B11>0,B11*(1+B32)^B33,0)"],
-    ["Banka Faizi NPV (TL)", "=TOPLA(KAYDIR(I3;1;0;B33;1))-B11"],
+    ["Banka Faizi NPV (TL)", "=SUM(OFFSET(I3,1,0,B33,1))-B11"],
     [],
     [],
     ["🔹 Parametreler"],
