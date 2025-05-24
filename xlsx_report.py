@@ -181,7 +181,7 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
             summary.write_formula(f"I{r}", f"=H{r}/(1+B32)^{r-3}")
         summary.write_formula("B24", "=SUM(F4:INDEX(F4:F8,B33))-B11")
         summary.write_formula("B27", "=IF(B11>0,B11*(1+B32)^B33,0)")
-        summary.write_formula("B28", "=SUM(OFFSET(I3,1,0,B33,1))-B11")
+        summary.write_formula("B28", "=TOPLA(KAYDIR(I3;1;0;B33;1))-B11")
 
         # Helper cells for NPV comparison chart now stored on "Grafikler" sheet
         charts = workbook.get_worksheet_by_name("Grafikler")

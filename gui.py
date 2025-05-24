@@ -460,7 +460,7 @@ class ROIHesaplamaArayuzu(QMainWindow):
             # NPV ve Banka Faizi formüllerini ekle
             ozet_sayfasi['B24'].value = '=SUM(F4:INDEX(F4:F8,B33))-B11'  # NPV
             ozet_sayfasi['B27'].value = '=IF(B11>0,B11*(1+B32)^B33,0)'  # Banka Faizi ile Elde Edilecek Getiri
-            ozet_sayfasi['B28'].value = '=SUM(OFFSET(I3,1,0,B33,1))-B11'
+            ozet_sayfasi['B28'].value = '=TOPLA(KAYDIR(I3;1;0;B33;1))-B11'
 
             # Grafik ekle
             grafik_ekle(wb)
