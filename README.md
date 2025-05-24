@@ -67,8 +67,8 @@ Aracın çalışabilmesi için `openpyxl` paketinin kurulu olması gerekir.
 
 `roi_analyses.py` dosyası, klasördeki `.xlsx` raporlarını listeleyen
 basit bir PyQt5 arayüzü sunar. Varsayılan olarak en yeni dosya seçilir ve
-"Yorumla" butonuna basıldığında rapordaki metrikler analiz edilerek ekranda
-gösterilir.
+araç açıldığında bu raporun değerlendirmesi otomatik olarak gösterilir.
+İstenirse "Yorumla" butonuyla farklı bir dosyanın analizi de yapılabilir.
 
 ```bash
 python roi_analyses.py

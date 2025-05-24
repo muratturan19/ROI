@@ -46,6 +46,9 @@ class ROIAnalysesWindow(QWidget):
         layout.addWidget(self.text)
 
         self.refresh_files()
+        # Automatically analyze the most recent report after the combo box
+        # has been populated with available files and the newest one selected.
+        self.run_analysis()
 
     def refresh_files(self) -> None:
         files = [f for f in glob(os.path.join(self.folder, "*.xlsx")) if os.path.isfile(f)]
