@@ -449,10 +449,11 @@ class ROIHesaplamaArayuzu(QMainWindow):
             ozet_sayfasi['F8'].value = '=E9/(1+B32)^5'  # 5. yıl bugünkü değeri
 
             # Kümülatif getiri ve toplam yatırım sütunları için formüller
-            ozet_sayfasi['G4'].value = '=E4+E5'
-            ozet_sayfasi['G5'].value = '=G4+E6'
-            ozet_sayfasi['G6'].value = '=G5+E7'
-            ozet_sayfasi['G7'].value = '=G6+E8'
+            ozet_sayfasi['G4'].value = '=E4'
+            ozet_sayfasi['G5'].value = '=G4+E5'
+            ozet_sayfasi['G6'].value = '=G5+E6'
+            ozet_sayfasi['G7'].value = '=G6+E7'
+            ozet_sayfasi['G8'].value = '=G7+E8'
             for r in range(4, 9):
                 ozet_sayfasi[f'H{r}'].value = f'=B11*(1+B32)^{r-3}'
                 ozet_sayfasi[f'I{r}'].value = f'=H{r}/(1+B32)^{r-3}'
