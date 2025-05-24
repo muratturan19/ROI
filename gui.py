@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QLabel,
     QPushButton,
     QTabWidget,
@@ -12,6 +13,8 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QStyle,
     QCheckBox,
+    QRadioButton,
+    QButtonGroup,
 )
 from PyQt5.QtGui import QFont, QIcon, QDoubleValidator
 from PyQt5.QtCore import Qt
@@ -74,6 +77,23 @@ class ROIHesaplamaArayuzu(QMainWindow):
             "İşaretli bırakıldığında grafik_ekle_xlsxwriter fonksiyonundaki dört grafikli rapor oluşturulur."
         )
         layout.addWidget(self.use_xlsxwriter)
+
+        # Para Birimi Seçimi
+        para_grup = QGroupBox("Para Birimi")
+        para_layout = QHBoxLayout()
+        self.tl_radio = QRadioButton("\u20BA")
+        self.dollar_radio = QRadioButton("$")
+        self.euro_radio = QRadioButton("\u20AC")
+        para_layout.addWidget(self.tl_radio)
+        para_layout.addWidget(self.dollar_radio)
+        para_layout.addWidget(self.euro_radio)
+        para_grup.setLayout(para_layout)
+        self.para_birimi_grubu = QButtonGroup(self)
+        self.para_birimi_grubu.addButton(self.tl_radio)
+        self.para_birimi_grubu.addButton(self.dollar_radio)
+        self.para_birimi_grubu.addButton(self.euro_radio)
+        self.tl_radio.setChecked(True)
+        layout.addWidget(para_grup)
 
         # Hesapla Butonu
         hesapla_btn = QPushButton('ROI Hesapla')
