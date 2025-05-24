@@ -431,7 +431,9 @@ class ROIHesaplamaArayuzu(QMainWindow):
             ozet_sayfasi['E1'].value = "Yıllık Getiri (TL)"
             ozet_sayfasi['F1'].value = "Bugünkü Değer (TL)"
             for i in range(1, 6):
-                ozet_sayfasi[f'D{i+3}'].value = i  # D4:D8: 1’den 5’e kadar yıllar
+                cell = ozet_sayfasi[f'D{i+3}']
+                cell.value = i  # D4:D8: 1’den 5’e kadar yıllar
+                cell.number_format = '0 "Yıl"'
 
             # E ve F sütunlarındaki formülleri ekle
             ozet_sayfasi['E4'].value = '=B18'  # 1. yıl getirisi

@@ -14,7 +14,6 @@ from formatting import (
     sayfa_bicimlendir_xlsxwriter,
     sutun_genislikleri_ayarla_xlsxwriter,
     grafik_ekle_xlsxwriter,
-    roi_detay_hesapla,
 )
 
 
@@ -159,8 +158,9 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
         summary.write_formula("B22", "=IF(B11>0,B18/B11,0)")
         summary.write_formula("B23", "=IF(B18>0,B11/B18,0)")
 
+        year_format = workbook.add_format({"num_format": '0 "yıl"'})
         for i in range(5):
-            summary.write(i + 3, 3, i + 1)
+            summary.write_number(i + 3, 3, i + 1, year_format)
 
         summary.write_formula("E4", "=B18")
         summary.write_formula("E5", "=E4*(1+B34)")
@@ -183,10 +183,6 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
             "B28",
             "=IF(B11>0,B27/(1+B32)^B33-B11,0)",
         )
-
-        toplam_yatirim = 12000000 + 450000 + 35000 + 5000 + 45000
-        toplam_getiri = maliyet_tasarrufu + verim_artisi + kalite_gelir
-        roi_detay_hesapla(summary, toplam_yatirim, toplam_getiri)
 
         # Helper cells for NPV comparison chart now stored on "Grafikler" sheet
         charts = workbook.get_worksheet_by_name("Grafikler")
