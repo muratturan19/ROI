@@ -9,7 +9,7 @@ def get_common_styles():
     }
 
 
-def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
+def sayfa_bicimlendir_xlsxwriter(sheet, workbook, currency_symbol="₺"):
     """Apply formatting rules for a worksheet created with xlsxwriter.
 
     Parameters
@@ -31,9 +31,10 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
         'align': 'center',
         'valign': 'vcenter'
     })
+    currency_format = f"#,##0.00 {currency_symbol}"
     cell_format = workbook.add_format({
         'border': 1,
-        'num_format': '#,##0.00 ₺',  # Para birimi formatı
+        'num_format': currency_format,  # Para birimi formatı
         'font_size': 10,
         'align': 'left',
         'valign': 'vcenter'
@@ -48,7 +49,7 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook):
     bold_format = workbook.add_format({
         'bold': True,
         'border': 1,
-        'num_format': '#,##0.00 ₺',
+        'num_format': currency_format,
         'font_size': 10,
         'align': 'left',
         'valign': 'vcenter',
@@ -134,7 +135,7 @@ def sutun_genislikleri_ayarla_xlsxwriter(sheet, workbook=None):
         sheet.set_column('E:E', 20)  # Yıllık Getiri sütunu
         sheet.set_column('F:F', 20)  # Bugünkü Değer sütunu
 
-def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
+def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler", currency_symbol="₺"):
     """Insert summary charts into the specified worksheet."""
     ozet_sayfasi = workbook.get_worksheet_by_name("4-Özet ve ROI")
     chart_sheet = workbook.get_worksheet_by_name(chart_sheet_name)
@@ -168,7 +169,7 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     })
     chart2.set_title({'name': 'NPV Eğilimi'})
     chart2.set_x_axis({'name': 'Yıl', 'num_format': '0'})
-    chart2.set_y_axis({'name': 'Bugünkü Değer (TL)', 'num_format': '#,##0 ₺'})
+    chart2.set_y_axis({'name': f'Bugünkü Değer ({currency_symbol})', 'num_format': f'#,##0 {currency_symbol}'})
     chart2.set_size({'width': 700, 'height': 500})
     chart_sheet.insert_chart('M2', chart2)
 
@@ -180,7 +181,7 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'data_labels': {'value': True},
     })
     chart_cum.set_x_axis({'name': 'Yıl', 'num_format': '0'})
-    chart_cum.set_y_axis({'name': 'Kümülatif Getiri (TL)', 'num_format': '#,##0 ₺'})
+    chart_cum.set_y_axis({'name': f'Kümülatif Getiri ({currency_symbol})', 'num_format': f'#,##0 {currency_symbol}'})
 
     chart_line = workbook.add_chart({'type': 'line'})
     chart_line.add_series({
@@ -209,7 +210,7 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
         'fill': {'color': '#BFBFBF'},
     })
     chart_npv.set_title({'name': 'NPV Karşılaştırması'})
-    chart_npv.set_y_axis({'name': 'NPV (TL)'})
+    chart_npv.set_y_axis({'name': f'NPV ({currency_symbol})'})
     chart_npv.set_size({'width': 700, 'height': 500})
     chart_sheet.insert_chart('M28', chart_npv)
 
@@ -217,8 +218,8 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler"):
     kpi_text = (
         'ROI: =TEXT(B22,"0.00%")\n'
         'Geri Ödeme: =TEXT(B23,"0.0 \\"yıl\\"")\n'
-        'Toplam Getiri: =TEXT(B18,"#,##0 ₺")\n'
-        'NPV: =TEXT(B24,"#,##0 ₺")'
+        f'Toplam Getiri: =TEXT(B18,"#,##0 {currency_symbol}")\n'
+        f'NPV: =TEXT(B24,"#,##0 {currency_symbol}")'
     )
     chart_sheet.insert_textbox(
         'M54',
