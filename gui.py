@@ -334,7 +334,15 @@ class ROIHesaplamaArayuzu(QMainWindow):
 
             dosya_adi = f"{sirket_adi}_{proje_adi}_ROI_Raporu_{datetime.now().strftime('%Y%m%d')}.xlsx"
 
-            create_xlsxwriter_report(data, dosya_adi)
+            # Para birimini seçilen radyo butonuna göre belirle
+            if self.tl_radio.isChecked():
+                currency = "₺"
+            elif self.dollar_radio.isChecked():
+                currency = "$"
+            else:
+                currency = "€"
+
+            create_xlsxwriter_report(data, dosya_adi, currency)
 
             QMessageBox.information(
                 self,

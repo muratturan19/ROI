@@ -17,7 +17,7 @@ from formatting import (
 )
 
 
-def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
+def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx", currency="₺"):
     """Create a workbook using xlsxwriter and apply advanced formatting.
 
     Parameters
@@ -200,4 +200,4 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
 
 
 if __name__ == "__main__":
-    create_xlsxwriter_report({})
+    create_xlsxwriter_report({}, currency="₺")
