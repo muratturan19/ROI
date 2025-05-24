@@ -442,23 +442,25 @@ class ROIHesaplamaArayuzu(QMainWindow):
             ozet_sayfasi['E7'].value = '=E6*(1+B34)'  # 4. yıl getirisi
             ozet_sayfasi['E8'].value = '=E7*(1+B34)'  # 5. yıl getirisi
 
-            ozet_sayfasi['F4'].value = '=E4'  # 1. yıl bugünkü değeri (iskonto yok)
-            ozet_sayfasi['F5'].value = '=E5/(1+B32)^1'  # 2. yıl bugünkü değeri
-            ozet_sayfasi['F6'].value = '=E6/(1+B32)^2'  # 3. yıl bugünkü değeri
-            ozet_sayfasi['F7'].value = '=E7/(1+B32)^3'  # 4. yıl bugünkü değeri
-            ozet_sayfasi['F8'].value = '=E8/(1+B32)^4'  # 5. yıl bugünkü değeri
+            ozet_sayfasi['F4'].value = '=E5/(1+B32)^1'  # 1. yıl bugünkü değeri
+            ozet_sayfasi['F5'].value = '=E6/(1+B32)^2'  # 2. yıl bugünkü değeri
+            ozet_sayfasi['F6'].value = '=E7/(1+B32)^3'  # 3. yıl bugünkü değeri
+            ozet_sayfasi['F7'].value = '=E8/(1+B32)^4'  # 4. yıl bugünkü değeri
+            ozet_sayfasi['F8'].value = '=E9/(1+B32)^5'  # 5. yıl bugünkü değeri
 
             # Kümülatif getiri ve toplam yatırım sütunları için formüller
-            ozet_sayfasi['G4'].value = '=E4'
-            for r in range(5, 9):
-                ozet_sayfasi[f'G{r}'].value = f'=G{r-1}+E{r}'
+            ozet_sayfasi['G4'].value = '=E4+E5'
+            ozet_sayfasi['G5'].value = '=G4+E6'
+            ozet_sayfasi['G6'].value = '=G5+E7'
+            ozet_sayfasi['G7'].value = '=G6+E8'
             for r in range(4, 9):
-                ozet_sayfasi[f'H{r}'].value = '=B11'
+                ozet_sayfasi[f'H{r}'].value = f'=B11*(1+B32)^{r-3}'
+                ozet_sayfasi[f'I{r}'].value = f'=H{r}/(1+B32)^{r-3}'
 
             # NPV ve Banka Faizi formüllerini ekle
             ozet_sayfasi['B24'].value = '=SUM(F4:INDEX(F4:F8,B33))-B11'  # NPV
             ozet_sayfasi['B27'].value = '=IF(B11>0,B11*(1+B32)^B33,0)'  # Banka Faizi ile Elde Edilecek Getiri
-            ozet_sayfasi['B28'].value = '=IF(B11>0,B27/(1+B32)^B33-B11,0)'  # Banka Faizi NPV
+            ozet_sayfasi['B28'].value = '=SUM(OFFSET(I3,1,0,B33,1))-B11'
 
             # Grafik ekle
             grafik_ekle(wb)

@@ -167,22 +167,21 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx"):
         summary.write_formula("E6", "=E5*(1+B34)")
         summary.write_formula("E7", "=E6*(1+B34)")
         summary.write_formula("E8", "=E7*(1+B34)")
-        summary.write_formula("F4", "=E4")
-        summary.write_formula("F5", "=E5/(1+B32)^1")
-        summary.write_formula("F6", "=E6/(1+B32)^2")
-        summary.write_formula("F7", "=E7/(1+B32)^3")
-        summary.write_formula("F8", "=E8/(1+B32)^4")
-        summary.write_formula("G4", "=E4")
-        for r in range(5, 9):
-            summary.write_formula(f"G{r}", f"=G{r-1}+E{r}")
+        summary.write_formula("F4", "=E5/(1+B32)^1")
+        summary.write_formula("F5", "=E6/(1+B32)^2")
+        summary.write_formula("F6", "=E7/(1+B32)^3")
+        summary.write_formula("F7", "=E8/(1+B32)^4")
+        summary.write_formula("F8", "=E9/(1+B32)^5")
+        summary.write_formula("G4", "=E4+E5")
+        summary.write_formula("G5", "=G4+E6")
+        summary.write_formula("G6", "=G5+E7")
+        summary.write_formula("G7", "=G6+E8")
         for r in range(4, 9):
-            summary.write_formula(f"H{r}", "=B11")
+            summary.write_formula(f"H{r}", f"=B11*(1+B32)^{r-3}")
+            summary.write_formula(f"I{r}", f"=H{r}/(1+B32)^{r-3}")
         summary.write_formula("B24", "=SUM(F4:INDEX(F4:F8,B33))-B11")
         summary.write_formula("B27", "=IF(B11>0,B11*(1+B32)^B33,0)")
-        summary.write_formula(
-            "B28",
-            "=IF(B11>0,B27/(1+B32)^B33-B11,0)",
-        )
+        summary.write_formula("B28", "=SUM(OFFSET(I3,1,0,B33,1))-B11")
 
         # Helper cells for NPV comparison chart now stored on "Grafikler" sheet
         charts = workbook.get_worksheet_by_name("Grafikler")
