@@ -448,6 +448,13 @@ class ROIHesaplamaArayuzu(QMainWindow):
             ozet_sayfasi['F7'].value = '=E7/(1+B32)^3'  # 4. yıl bugünkü değeri
             ozet_sayfasi['F8'].value = '=E8/(1+B32)^4'  # 5. yıl bugünkü değeri
 
+            # Kümülatif getiri ve toplam yatırım sütunları için formüller
+            ozet_sayfasi['G4'].value = '=E4'
+            for r in range(5, 9):
+                ozet_sayfasi[f'G{r}'].value = f'=G{r-1}+E{r}'
+            for r in range(4, 9):
+                ozet_sayfasi[f'H{r}'].value = '=B11'
+
             # NPV ve Banka Faizi formüllerini ekle
             ozet_sayfasi['B24'].value = '=SUM(F4:INDEX(F4:F8,B33))-B11'  # NPV
             ozet_sayfasi['B27'].value = '=IF(B11>0,B11*(1+B32)^B33,0)'  # Banka Faizi ile Elde Edilecek Getiri
