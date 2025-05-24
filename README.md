@@ -40,6 +40,7 @@ calculations.py	Finansal formüller
 xlsx_report.py	Excel çıktısı ve rapor motoru
 formatting.py	Hücre stilleri, renkler, grafik biçimi
 data_templates.py	Tabloların şablon yapısı
+roi_analysis.py	Rapor sonrasi hizli degerlendirme araci
 
 🎯 Örnek Kullanım Senaryosu
 Şirket bilgilerini ve otomasyon sonrası parametreleri girin.
@@ -49,6 +50,18 @@ Para birimi seçin.
 “ROI Hesapla” butonuna tıklayın.
 
 Anında Excel raporu oluşturulsun.
+
+### CLI Rapor Değerlendirme
+
+`roi_analysis.py` dosyası klasördeki en son oluşturulan Excel raporunu okuyarak
+"4-Özet ve ROI" sayfasındaki temel metrikleri yorumlar.
+
+```bash
+python roi_analysis.py
+```
+
+Komut çalıştığında yatırımın kârlılığına dair kısa bir özet ekrana yazdırılır.
+Aracın çalışabilmesi için `openpyxl` paketinin kurulu olması gerekir.
 
 🤖 Yapay Zekâ Desteğiyle
 Bu proje, gelişmiş bir Codex destekli yazılım üretim süreciyle geliştirildi.
