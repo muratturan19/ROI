@@ -442,11 +442,11 @@ class ROIHesaplamaArayuzu(QMainWindow):
             ozet_sayfasi['E7'].value = '=E6*(1+B34)'  # 4. yıl getirisi
             ozet_sayfasi['E8'].value = '=E7*(1+B34)'  # 5. yıl getirisi
 
-            ozet_sayfasi['F4'].value = '=E5/(1+B32)^1'  # 1. yıl bugünkü değeri
-            ozet_sayfasi['F5'].value = '=E6/(1+B32)^2'  # 2. yıl bugünkü değeri
-            ozet_sayfasi['F6'].value = '=E7/(1+B32)^3'  # 3. yıl bugünkü değeri
-            ozet_sayfasi['F7'].value = '=E8/(1+B32)^4'  # 4. yıl bugünkü değeri
-            ozet_sayfasi['F8'].value = '=E9/(1+B32)^5'  # 5. yıl bugünkü değeri
+            ozet_sayfasi['F4'].value = '=E4/(1+B32)^0'  # 1. yıl bugünkü değeri
+            ozet_sayfasi['F5'].value = '=E5/(1+B32)^1'  # 2. yıl bugünkü değeri
+            ozet_sayfasi['F6'].value = '=E6/(1+B32)^2'  # 3. yıl bugünkü değeri
+            ozet_sayfasi['F7'].value = '=E7/(1+B32)^3'  # 4. yıl bugünkü değeri
+            ozet_sayfasi['F8'].value = '=E8/(1+B32)^4'  # 5. yıl bugünkü değeri
 
             # Kümülatif getiri ve toplam yatırım sütunları için formüller
             ozet_sayfasi['G4'].value = '=E4+E5'
