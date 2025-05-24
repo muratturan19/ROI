@@ -63,6 +63,17 @@ python roi_analysis.py
 Komut çalıştığında yatırımın kârlılığına dair kısa bir özet ekrana yazdırılır.
 Aracın çalışabilmesi için `openpyxl` paketinin kurulu olması gerekir.
 
+### GUI Rapor Değerlendirme
+
+`roi_analyses.py` dosyası, klasördeki `.xlsx` raporlarını listeleyen
+basit bir PyQt5 arayüzü sunar. Varsayılan olarak en yeni dosya seçilir ve
+"Yorumla" butonuna basıldığında rapordaki metrikler analiz edilerek ekranda
+gösterilir.
+
+```bash
+python roi_analyses.py
+```
+
 🤖 Yapay Zekâ Desteğiyle
 Bu proje, gelişmiş bir Codex destekli yazılım üretim süreciyle geliştirildi.
 Kod önerileri, refactor işlemleri ve test süreçleri AI destekli olarak yürütüldü.
