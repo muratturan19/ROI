@@ -17,7 +17,7 @@ from formatting import (
 )
 
 
-def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx", currency="₺"):
+def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx", currency_symbol="₺"):
     """Create a workbook using xlsxwriter and apply advanced formatting.
 
     Parameters
@@ -26,6 +26,8 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx", curren
         Values collected from the GUI form.
     filename : str, optional
         Output workbook name.
+    currency_symbol : str, optional
+        Currency symbol used for formatting.
     """
     workbook = xlsxwriter.Workbook(filename)
     workbook.add_worksheet("Grafikler")
@@ -61,7 +63,7 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx", curren
         for r, row in enumerate(tpl):
             sheet.write_row(r, 0, row)
         sutun_genislikleri_ayarla_xlsxwriter(sheet, workbook)
-        sayfa_bicimlendir_xlsxwriter(sheet, workbook)
+        sayfa_bicimlendir_xlsxwriter(sheet, workbook, currency_symbol)
 
     # Ana sayfa bilgileri
     ana = workbook.get_worksheet_by_name("Ana Sayfa")
@@ -195,9 +197,9 @@ def create_xlsxwriter_report(data, filename="roi_report_xlsxwriter.xlsx", curren
         summary.conditional_format("B22", {"type": "3_color_scale"})
         summary.conditional_format("B23", {"type": "data_bar", "bar_color": "#63C384"})
 
-    grafik_ekle_xlsxwriter(workbook, "Grafikler")
+    grafik_ekle_xlsxwriter(workbook, "Grafikler", currency_symbol)
     workbook.close()
 
 
 if __name__ == "__main__":
-    create_xlsxwriter_report({}, currency="₺")
+    create_xlsxwriter_report({}, currency_symbol="₺")
