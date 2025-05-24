@@ -31,10 +31,9 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook, currency_symbol="₺"):
         'align': 'center',
         'valign': 'vcenter'
     })
-    currency_format = f"#,##0.00 {currency_symbol}"
     cell_format = workbook.add_format({
         'border': 1,
-        'num_format': currency_format,  # Para birimi formatı
+        'num_format': f'#,##0.00 {currency_symbol}',  # Para birimi formatı
         'font_size': 10,
         'align': 'left',
         'valign': 'vcenter'
@@ -49,7 +48,7 @@ def sayfa_bicimlendir_xlsxwriter(sheet, workbook, currency_symbol="₺"):
     bold_format = workbook.add_format({
         'bold': True,
         'border': 1,
-        'num_format': currency_format,
+        'num_format': f'#,##0.00 {currency_symbol}',
         'font_size': 10,
         'align': 'left',
         'valign': 'vcenter',
@@ -210,7 +209,10 @@ def grafik_ekle_xlsxwriter(workbook, chart_sheet_name="Grafikler", currency_symb
         'fill': {'color': '#BFBFBF'},
     })
     chart_npv.set_title({'name': 'NPV Karşılaştırması'})
-    chart_npv.set_y_axis({'name': f'NPV ({currency_symbol})'})
+    chart_npv.set_y_axis({
+        'name': f'NPV ({currency_symbol})',
+        'num_format': f'#,##0 {currency_symbol}'
+    })
     chart_npv.set_size({'width': 700, 'height': 500})
     chart_sheet.insert_chart('M28', chart_npv)
 
