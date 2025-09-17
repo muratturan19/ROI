@@ -204,8 +204,56 @@ def compute_series(
     return {"df": df, "summary": summary}
 
 
-def create_advanced_charts(df, summary, I, N):
-    """Gelişmiş grafik setini oluşturur"""
+def format_currency(amount, symbol="₺"):
+    """Para formatlaması"""
+    if abs(amount) >= 1_000_000:
+        return f"{amount/1_000_000:.1f}M {symbol}"
+    elif abs(amount) >= 1_000:
+        return f"{amount/1_000:.0f}K {symbol}"
+    else:
+        return f"{amount:,.0f} {symbol}"
+
+
+def get_metric_color_and_icon(metric_type, value, threshold_good=None, threshold_medium=None):
+    """Metrik için renk ve icon döndürür"""
+    if metric_type == "payback":
+        if value is None:
+            return "🔴", "#d62728"
+        elif value <= 12:
+            return "🟢", "#2ca02c"
+        elif value <= 24:
+            return "🟡", "#ff7f0e"
+        else:
+            return "🔴", "#d62728"
+
+    elif metric_type == "roi":
+        if value >= 100:
+            return "🚀", "#2ca02c"
+        elif value >= 50:
+            return "🟢", "#2ca02c"
+        elif value >= 20:
+            return "🟡", "#ff7f0e"
+        else:
+            return "🔴", "#d62728"
+
+    elif metric_type == "npv":
+        if value > 0:
+            return "✅", "#2ca02c"
+        else:
+            return "❌", "#d62728"
+
+    elif metric_type == "difference":
+        if value > 0:
+            return "📈", "#2ca02c"
+        else:
+            return "📉", "#d62728"
+
+    else:
+        return "📊", "#1f77b4"
+
+
+def create_advanced_charts(df, summary, I, N, currency_symbol="₺"):
+    """Gelişmiş grafik setini oluşturur - para birimi desteği ile"""
 
     fig_main = make_subplots(
         rows=2,
@@ -229,7 +277,7 @@ def create_advanced_charts(df, summary, I, N):
             name="Kümülatif Net",
             line=dict(color="#1f77b4", width=3),
             marker=dict(size=6),
-            hovertemplate="<b>Ay %{x}</b><br>Kümülatif Net: %{y:,.0f} TL<extra></extra>",
+            hovertemplate=f"<b>Ay %{{x}}</b><br>Kümülatif Net: %{{y:,.0f}} {currency_symbol}<extra></extra>",
         ),
         row=1,
         col=1,
@@ -334,13 +382,14 @@ def create_advanced_charts(df, summary, I, N):
 
     fig_main.update_traces(row=1, col=2, selector=dict(type="bar"))
     fig_main.update_xaxes(title_text="Ay", row=2, col=1)
-    fig_main.update_yaxes(title_text="TL", row=2, col=1)
+    fig_main.update_yaxes(title_text=f"Tutar ({currency_symbol})", row=1, col=1)
+    fig_main.update_yaxes(title_text=f"Tutar ({currency_symbol})", row=2, col=1)
 
     return fig_main
 
 
-def create_comparison_chart(summary, I):
-    """Karşılaştırma grafiği"""
+def create_comparison_chart(summary, I, currency_symbol="₺"):
+    """Karşılaştırma grafiği - para birimi desteği ile"""
     fig_comp = go.Figure()
 
     categories = ["Yatırım", "Toplam Fayda", "NPV", "Alternatif Getiri"]
@@ -358,7 +407,7 @@ def create_comparison_chart(summary, I):
             x=categories,
             y=values,
             marker_color=colors,
-            text=[f"{v:,.0f} TL" for v in values],
+            text=[f"{format_currency(v, currency_symbol)}" for v in values],
             textposition="auto",
         )
     )
@@ -367,7 +416,7 @@ def create_comparison_chart(summary, I):
         title="Yatırım Karşılaştırması",
         title_x=0.5,
         xaxis_title="Kategori",
-        yaxis_title="Tutar (TL)",
+        yaxis_title=f"Tutar ({currency_symbol})",
         showlegend=False,
         height=400,
         plot_bgcolor="rgba(0,0,0,0)",
@@ -395,8 +444,35 @@ with st.sidebar:
 
     st.subheader("Genel")
     I = st.number_input("Başlangıç Yatırımı (I)", min_value=0.0, value=1_000_000.0, step=50_000.0, format="%f")
-    N = st.number_input("Horizon (Ay)", min_value=1, value=36, step=1)
     r_annual = st.number_input("İskonto / Alternatif Getiri (Yıllık %)", min_value=0.0, value=30.0, step=1.0) / 100.0
+
+    st.subheader("💰 Para Birimi")
+    currency_options = {
+        "TL": {"symbol": "₺", "name": "Türk Lirası"},
+        "USD": {"symbol": "$", "name": "Amerikan Doları"},
+        "EUR": {"symbol": "€", "name": "Euro"},
+        "GBP": {"symbol": "£", "name": "İngiliz Sterlini"},
+    }
+
+    selected_currency = st.selectbox(
+        "Para Birimi Seçin",
+        options=list(currency_options.keys()),
+        index=0,
+        format_func=lambda x: f"{currency_options[x]['symbol']} {currency_options[x]['name']}",
+    )
+
+    currency_symbol = currency_options[selected_currency]["symbol"]
+    currency_name = currency_options[selected_currency]["name"]
+
+    st.subheader("📅 Analiz Dönemi")
+    analysis_years = st.number_input(
+        "Analiz Dönemi (Yıl)",
+        min_value=1,
+        max_value=10,
+        value=3,
+        step=1,
+        help="ROI ve getiri karşılaştırması için dönem",
+    )
 
     st.subheader("İşçilik")
     E = st.number_input("Tasarruf Edilen İşçi Sayısı (E)", min_value=0.0, value=3.0, step=1.0)
@@ -407,19 +483,19 @@ with st.sidebar:
     s_before = st.number_input("Hurda/Hata Oranı (Öncesi %)", min_value=0.0, max_value=100.0, value=5.0, step=0.1) / 100.0
     s_after = st.number_input("Hurda/Hata Oranı (Sonrası %)", min_value=0.0, max_value=100.0, value=2.0, step=0.1) / 100.0
     units_pm = st.number_input("Aylık Üretim Adedi", min_value=0.0, value=10_000.0, step=100.0)
-    defect_cost = st.number_input("Bir Hatanın Maliyeti (TL)", min_value=0.0, value=250.0, step=10.0)
+    defect_cost = st.number_input(f"Bir Hatanın Maliyeti ({currency_symbol})", min_value=0.0, value=250.0, step=10.0)
 
     st.subheader("Zaman Tasarrufu")
     hours_saved_pm = st.number_input("Aylık Zaman Kazancı (saat)", min_value=0.0, value=120.0, step=1.0)
-    hourly_rate = st.number_input("Saatlik Ücret (TL)", min_value=0.0, value=400.0, step=10.0)
+    hourly_rate = st.number_input(f"Saatlik Ücret ({currency_symbol})", min_value=0.0, value=400.0, step=10.0)
 
     st.subheader("Gelir Artışı (Opsiyonel)")
-    revenue_base_pm = st.number_input("Baz Aylık Gelir (TL)", min_value=0.0, value=0.0, step=1_000.0)
+    revenue_base_pm = st.number_input(f"Baz Aylık Gelir ({currency_symbol})", min_value=0.0, value=0.0, step=1_000.0)
     uplift_pct = st.number_input("Gelir Artış Oranı (%)", min_value=0.0, max_value=100.0, value=0.0, step=0.5) / 100.0
 
     with st.expander("İleri Düzey (Opex & Amortisman)"):
         opex_pm = st.number_input(
-            "Aylık Opex (TL) – ROI tanımında kullanılmaz, NPV'de CF'ten düşülür",
+            f"Aylık Opex ({currency_symbol}) – ROI tanımında kullanılmaz, NPV'de CF'ten düşülür",
             min_value=0.0,
             value=0.0,
             step=100.0,
@@ -433,19 +509,24 @@ with st.sidebar:
         s_before, s_after, units_pm, defect_cost = 0.04, 0.02, 6000.0, 200.0
         hours_saved_pm, hourly_rate = 80.0, 300.0
         revenue_base_pm, uplift_pct = 0.0, 0.0
-        I, N, r_annual = 600_000.0, 24, 0.28
+        I, analysis_years, r_annual = 600_000.0, 2, 0.28
     if st.button("Orta Ölçek"):
         E, C0, i_annual = 3.0, 50_000.0, 0.40
         s_before, s_after, units_pm, defect_cost = 0.05, 0.02, 10_000.0, 250.0
         hours_saved_pm, hourly_rate = 120.0, 400.0
         revenue_base_pm, uplift_pct = 0.0, 0.0
-        I, N, r_annual = 1_000_000.0, 36, 0.30
+        I, analysis_years, r_annual = 1_000_000.0, 3, 0.30
     if st.button("Kurumsal"):
         E, C0, i_annual = 6.0, 60_000.0, 0.35
         s_before, s_after, units_pm, defect_cost = 0.06, 0.03, 25_000.0, 300.0
         hours_saved_pm, hourly_rate = 240.0, 500.0
         revenue_base_pm, uplift_pct = 1_500_000.0, 0.01
-        I, N, r_annual = 3_000_000.0, 48, 0.26
+        I, analysis_years, r_annual = 3_000_000.0, 4, 0.26
+
+# Dönem hesaplaması
+analysis_years_value = int(analysis_years)
+analysis_months = analysis_years_value * 12
+N = analysis_months
 
 # Compute
 res = compute_series(
@@ -474,66 +555,168 @@ if "I" in locals() and I > 0:
     progress = min(total_benefit / I, 2.0) if I > 0 else 0
     st.sidebar.progress(progress / 2, text=f"Fayda/Yatırım Oranı: {progress:.1%}")
 
-fig_main = create_advanced_charts(df, summary, I, N)
-fig_comp = create_comparison_chart(summary, I)
+fig_main = create_advanced_charts(df, summary, I, N, currency_symbol)
+fig_comp = create_comparison_chart(summary, I, currency_symbol)
+
+display_period = f"{analysis_years_value} yıl" if analysis_years_value > 1 else "1 yıl"
 
 st.markdown('<h1 class="main-title">🚀 Otomasyon ROI & NPV Aracı</h1>', unsafe_allow_html=True)
 
 st.markdown('<div class="dashboard-container">', unsafe_allow_html=True)
+st.markdown(
+    f'<h2 style="text-align: center; margin-bottom: 2rem; color: #1f77b4;">📊 Yatırım Analizi Özeti ({display_period})</h2>',
+    unsafe_allow_html=True,
+)
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
     payback_value = summary.get("Payback (ay)")
-    payback_color = "🟢" if payback_value and payback_value <= 24 else "🟡" if payback_value and payback_value <= 36 else "🔴"
+    payback_icon, payback_color = get_metric_color_and_icon("payback", payback_value)
+    payback_text = f"{payback_value} ay" if payback_value is not None else "∞"
+
     st.markdown(
         f"""
-    <div class="metric-card">
-        <div class="metric-title">{payback_color} Geri Dönüş Süresi</div>
-        <div class="metric-value">{payback_value if payback_value else '∞'}</div>
-        <div style="color: gray;">ay</div>
+    <div class="metric-card" style="border-left-color: {payback_color};">
+        <div class="metric-title">{payback_icon} Yatırımın Geri Dönüş Süresi</div>
+        <div class="metric-value" style="color: {payback_color};">{payback_text}</div>
+        <div style="color: gray; font-size: 0.8rem;">
+            {format_currency(I, currency_symbol)} yatırımın amortisman süresi
+        </div>
     </div>
     """,
         unsafe_allow_html=True,
     )
 
 with col2:
-    roi_value = summary.get("ROI (N ay) %", 0.0)
-    roi_color = "🟢" if roi_value > 50 else "🟡" if roi_value > 20 else "🔴"
+    total_return = summary.get("Toplam Aylık Fayda", 0.0)
+    return_icon, return_color = get_metric_color_and_icon("general", total_return)
+
     st.markdown(
         f"""
-    <div class="metric-card">
-        <div class="metric-title">{roi_color} ROI ({N} ay)</div>
-        <div class="metric-value">{roi_value:.1f}%</div>
-        <div style="color: gray;">{summary['Toplam Aylık Fayda']:,.0f} TL toplam fayda</div>
+    <div class="metric-card" style="border-left-color: {return_color};">
+        <div class="metric-title">💰 Yatırımın Toplam Getirisi ({display_period})</div>
+        <div class="metric-value" style="color: {return_color};">{format_currency(total_return, currency_symbol)}</div>
+        <div style="color: gray; font-size: 0.8rem;">
+            İndirimsiz brüt toplam fayda
+        </div>
     </div>
     """,
         unsafe_allow_html=True,
     )
 
 with col3:
-    npv_value = summary.get("NPV", 0.0)
-    npv_color = "🟢" if npv_value > 0 else "🔴"
+    alternative_return = summary.get("FV Alternatif", 0.0)
+    alt_icon = "🏦"
+
     st.markdown(
         f"""
-    <div class="metric-card">
-        <div class="metric-title">{npv_color} Net Bugünkü Değer</div>
-        <div class="metric-value">{npv_value:,.0f}</div>
-        <div style="color: gray;">TL</div>
+    <div class="metric-card" style="border-left-color: #ff7f0e;">
+        <div class="metric-title">{alt_icon} Yatırımın Alternatif Getirisi ({display_period})</div>
+        <div class="metric-value" style="color: #ff7f0e;">{format_currency(alternative_return, currency_symbol)}</div>
+        <div style="color: gray; font-size: 0.8rem;">
+            %{r_annual*100:.1f} yıllık faizle alternatif yatırım
+        </div>
     </div>
     """,
         unsafe_allow_html=True,
     )
 
 with col4:
-    fv_diff = summary.get("FV Proje", 0.0) - summary.get("FV Alternatif", 0.0)
-    fv_color = "🟢" if fv_diff > 0 else "🔴"
+    difference = summary.get("FV Proje", 0.0) - summary.get("FV Alternatif", 0.0)
+    diff_icon, diff_color = get_metric_color_and_icon("difference", difference)
+
     st.markdown(
         f"""
-    <div class="metric-card">
-        <div class="metric-title">{fv_color} Alternatife Göre Fark</div>
-        <div class="metric-value">{fv_diff:,.0f}</div>
-        <div style="color: gray;">TL ({N} ay sonunda)</div>
+    <div class="metric-card" style="border-left-color: {diff_color};">
+        <div class="metric-title">{diff_icon} Fark (Proje - Alternatif)</div>
+        <div class="metric-value" style="color: {diff_color};">{format_currency(difference, currency_symbol)}</div>
+        <div style="color: gray; font-size: 0.8rem;">
+            {"Proje daha karlı" if difference > 0 else "Alternatif daha karlı" if difference < 0 else "Getiriler eşit"}
+        </div>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
+with col5:
+    roi_value = summary.get("ROI (N ay) %", 0.0)
+    roi_icon, roi_color = get_metric_color_and_icon("roi", roi_value)
+
+    st.markdown(
+        f"""
+    <div class="metric-card" style="border-left-color: {roi_color};">
+        <div class="metric-title">{roi_icon} ROI Değeri ({display_period})</div>
+        <div class="metric-value" style="color: {roi_color};">{roi_value:.1f}%</div>
+        <div style="color: gray; font-size: 0.8rem;">
+            Yatırım getiri oranı
+        </div>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('<div class="dashboard-container" style="margin-top: 1rem;">', unsafe_allow_html=True)
+
+col_left_metrics, col_center_metrics, col_right_metrics = st.columns(3)
+
+with col_left_metrics:
+    npv_icon, npv_color = get_metric_color_and_icon("npv", summary.get("NPV", 0.0))
+    st.markdown(
+        f"""
+    <div class="metric-card" style="border-left-color: {npv_color};">
+        <div class="metric-title">{npv_icon} Net Bugünkü Değer (NPV)</div>
+        <div class="metric-value" style="color: {npv_color};">{format_currency(summary.get('NPV', 0.0), currency_symbol)}</div>
+        <div style="color: gray; font-size: 0.8rem;">
+            %{r_annual*100:.1f} iskonto oranıyla bugünkü değer
+        </div>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
+with col_center_metrics:
+    breakeven_months = summary.get("Payback (ay)", None)
+    if breakeven_months:
+        breakeven_amount = I
+        st.markdown(
+            f"""
+        <div class="metric-card" style="border-left-color: #9467bd;">
+            <div class="metric-title">⚖️ Başabaş Analizi</div>
+            <div class="metric-value" style="color: #9467bd;">{format_currency(breakeven_amount, currency_symbol)}</div>
+            <div style="color: gray; font-size: 0.8rem;">
+                {breakeven_months}. ayda başabaş noktası
+            </div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            f"""
+        <div class="metric-card" style="border-left-color: #d62728;">
+            <div class="metric-title">⚖️ Başabaş Analizi</div>
+            <div class="metric-value" style="color: #d62728;">Yok</div>
+            <div style="color: gray; font-size: 0.8rem;">
+                {N} ay içinde başabaş sağlanamıyor
+            </div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+with col_right_metrics:
+    monthly_avg = summary.get("Toplam Aylık Fayda", 0.0) / N if N else 0
+    st.markdown(
+        f"""
+    <div class="metric-card" style="border-left-color: #17becf;">
+        <div class="metric-title">📅 Ortalama Aylık Getiri</div>
+        <div class="metric-value" style="color: #17becf;">{format_currency(monthly_avg, currency_symbol)}</div>
+        <div style="color: gray; font-size: 0.8rem;">
+            {N} ay ortalaması
+        </div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -555,17 +738,19 @@ with col_left:
         color = "red" if val < 0 else "green" if val > 0 else "black"
         return f"color: {color}"
 
-    styled_df = df.style.format(
-        {
-            "Aylık Fayda": "{:,.0f}",
-            "Nakit Akışı (CF)": "{:,.0f}",
-            "Kümülatif Net": "{:,.0f}",
-            "İşçilik Tasarrufu": "{:,.0f}",
-            "Hurda/Hata Tasarrufu": "{:,.0f}",
-            "Zaman Tasarrufu": "{:,.0f}",
-            "Gelir Artışı": "{:,.0f}",
-        }
-    ).applymap(color_negative_red, subset=["Kümülatif Net", "Nakit Akışı (CF)"])
+    format_dict = {
+        "Aylık Fayda": lambda x: f"{x:,.0f} {currency_symbol}",
+        "Nakit Akışı (CF)": lambda x: f"{x:,.0f} {currency_symbol}",
+        "Kümülatif Net": lambda x: f"{x:,.0f} {currency_symbol}",
+        "İşçilik Tasarrufu": lambda x: f"{x:,.0f} {currency_symbol}",
+        "Hurda/Hata Tasarrufu": lambda x: f"{x:,.0f} {currency_symbol}",
+        "Zaman Tasarrufu": lambda x: f"{x:,.0f} {currency_symbol}",
+        "Gelir Artışı": lambda x: f"{x:,.0f} {currency_symbol}",
+    }
+
+    styled_df = df.style.format(format_dict).applymap(
+        color_negative_red, subset=["Kümülatif Net", "Nakit Akışı (CF)"]
+    )
 
     st.dataframe(styled_df, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -578,9 +763,13 @@ with col_right:
     st.subheader("📈 Özet Analiz")
 
     if summary.get("NPV", 0) > 0:
-        st.success(f"✅ Proje ekonomik olarak uygun! NPV: {summary['NPV']:,.0f} TL")
+        st.success(
+            f"✅ Proje ekonomik olarak uygun! NPV: {format_currency(summary.get('NPV', 0.0), currency_symbol)}"
+        )
     else:
-        st.error(f"❌ Proje ekonomik olarak uygun değil. NPV: {summary['NPV']:,.0f} TL")
+        st.error(
+            f"❌ Proje ekonomik olarak uygun değil. NPV: {format_currency(summary.get('NPV', 0.0), currency_symbol)}"
+        )
 
     payback_value = summary.get("Payback (ay)")
     if payback_value and payback_value <= 24:
@@ -591,6 +780,27 @@ with col_right:
         st.error("🐌 Uzun vadeli veya geri dönüş yok")
 
     if "amort_toggle" in locals() and amort_toggle:
-        st.info(f"Muhasebe Görünümü: Aylık amortisman ~ {I/float(amort_months):,.0f} TL. (NPV'ye dahil edilmez)")
+        st.info(
+            f"Muhasebe Görünümü: Aylık amortisman ~ {format_currency(I/float(amort_months), currency_symbol)}. (NPV'ye dahil edilmez)"
+        )
 
     st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown(
+    f"""
+### 📋 Açıklamalar
+
+**🔍 Metrik Açıklamaları:**
+- **Geri Dönüş Süresi**: Yatırımın kendini amorti etme süresi
+- **Toplam Getiri**: {display_period} boyunca toplam brüt fayda
+- **Alternatif Getiri**: Aynı tutarın %{r_annual*100:.1f} faizle {display_period} değeri  
+- **Fark**: Proje ile alternatif yatırım arasındaki getiri farkı
+- **ROI**: Yatırım getiri oranı (ROI = (Toplam Fayda - Yatırım) / Yatırım × 100)
+- **NPV**: %{r_annual*100:.1f} iskonto oranıyla bugünkü net değer
+
+**💰 Para Birimi**: Tüm hesaplamalar {currency_name} ({currency_symbol}) cinsindendir.
+
+**⏱️ Analiz Dönemi**: {display_period} ({N} ay) üzerinden hesaplanmıştır.
+""",
+    unsafe_allow_html=True,
+)
