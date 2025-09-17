@@ -174,15 +174,15 @@ col1.metric(
 )
 col2.metric(
     f"Yatırımın Toplam Getirisi ({N} ay)",
-    f"{summary['ROI (N ay) %']:.1f} %",
+    f"{summary['Toplam Aylık Fayda']:,.0f} TL",
 )
 col3.metric(
     f"Yatırımın Alternatif Getirisi ({N} ay)",
     f"{summary['FV Alternatif']:,.0f} TL",
 )
 col4.metric(
-    "Projenin Gelecek Değeri",
-    f"{summary['FV Proje']:,.0f} TL",
+    "Proje − Alternatif (FV farkı)",
+    f"{summary['FV Proje'] - summary['FV Alternatif']:,.0f} TL",
 )
 
 st.metric("Net Bugünkü Değer (NPV)", f"{summary['NPV']:,.0f} TL")
@@ -212,7 +212,8 @@ st.dataframe(df.style.format({
 }))
 
 st.caption(
-    "Notlar: Toplam Getiri (ROI), yatırımın N ay boyunca sağladığı indirimsiz toplam kazanç / yatırım tutarıdır. "
-    "Geri Dönüş Süresi, yatırımın kendini amorti ettiği ayı gösterir. ROI basit tanıma göre opex hariç hesaplanır. "
-    "NPV nakit akışları ile aylık iskonto kullanır. Amortisman yalnızca muhasebe görünümünde bilgilendirme amaçlıdır."
+    "Notlar: Yatırımın Toplam Getirisi, N ay boyunca sağlanan indirimsiz toplam faydayı (TL) gösterir. "
+    "Alternatif getiri, aynı sermayenin alternatif maliyetle gelecekteki değerini temsil eder. "
+    "Geri Dönüş Süresi, yatırımın kendini amorti ettiği ayı gösterir. NPV nakit akışları ile aylık iskonto kullanır. "
+    "Amortisman yalnızca muhasebe görünümünde bilgilendirme amaçlıdır."
 )
