@@ -139,6 +139,13 @@ def compute_series(
     uplift_pct: float,
     # Advanced
     opex_pm: float = 0.0,
+    use_advanced_ops: bool = False,
+    current_oee: float = 75.0,
+    target_oee: float = 85.0,
+    avg_unit_profit: float = 50.0,
+    maintenance_cost_pm: float = 0.0,
+    breakdown_risk_pct: float = 5.0,
+    tech_obsolescence_annual: float = 0.0,
 ) -> Dict[str, pd.DataFrame]:
     if I is None or (isinstance(I, (float, int, np.floating, np.integer)) and not np.isfinite(I)) or I <= 0:
         I = 1.0
@@ -171,13 +178,33 @@ def compute_series(
     time_series = np.full(N, hours_saved_pm * hourly_rate)
 
     # Revenue uplift (constant monthly)
-    revenue_series = np.full(N, revenue_base_pm * uplift_pct)
+    revenue_series_base = np.full(N, revenue_base_pm * uplift_pct)
+
+    # Advanced operations adjustments
+    additional_revenue_pm = 0.0
+    additional_costs_pm = 0.0
+
+    if use_advanced_ops and current_oee > 0:
+        capacity_improvement = (target_oee / current_oee) - 1.0
+
+        if capacity_improvement > 0:
+            additional_production = units_per_month * capacity_improvement
+            additional_revenue_pm = additional_production * avg_unit_profit
+
+        monthly_tech_obsolescence = tech_obsolescence_annual / 12.0
+        expected_breakdown_cost = (I * 0.05) * (breakdown_risk_pct / 100.0)
+
+        additional_costs_pm = maintenance_cost_pm + expected_breakdown_cost + monthly_tech_obsolescence
+
+    revenue_series_advanced = np.full(N, additional_revenue_pm)
+    revenue_series = revenue_series_base + revenue_series_advanced
 
     monthly_benefit = labor_saving + scrap_series + time_series + revenue_series
     total_benefit = float(np.sum(monthly_benefit))
 
     # Cash flow: exclude amortization; include optional opex
-    cf = monthly_benefit - opex_pm
+    total_opex = opex_pm + additional_costs_pm
+    cf = monthly_benefit - total_opex
 
     # Cumulative net (with initial at t0)
     cum = -I + np.cumsum(cf)
@@ -214,7 +241,9 @@ def compute_series(
         "İşçilik Tasarrufu": labor_saving,
         "Hurda/Hata Tasarrufu": scrap_series,
         "Zaman Tasarrufu": time_series,
-        "Gelir Artışı": revenue_series,
+        "Gelir Artışı": revenue_series_base,
+        "Kapasite Artışı": revenue_series_advanced,
+        "Otomasyon Maliyetleri": np.full(N, -additional_costs_pm),
     })
 
     summary = {
@@ -395,6 +424,18 @@ def create_advanced_charts(df, summary, I, N, currency_symbol="₺"):
         col=2,
     )
 
+    if "Kapasite Artışı" in df.columns:
+        fig_main.add_trace(
+            go.Bar(
+                x=df["Ay"],
+                y=df["Kapasite Artışı"],
+                name="Kapasite Artışı",
+                marker_color="#17becf",
+            ),
+            row=1,
+            col=2,
+        )
+
     colors = ["green" if x > 0 else "red" for x in df["Nakit Akışı (CF)"]]
     fig_main.add_trace(
         go.Bar(
@@ -415,6 +456,12 @@ def create_advanced_charts(df, summary, I, N, currency_symbol="₺"):
         df["Zaman Tasarrufu"].sum(),
         df["Gelir Artışı"].sum(),
     ]
+    marker_colors = ["#2ca02c", "#ff7f0e", "#d62728", "#9467bd"]
+
+    if "Kapasite Artışı" in df.columns:
+        categories.append("Kapasite Artışı")
+        values.append(df["Kapasite Artışı"].sum())
+        marker_colors.append("#17becf")
 
     fig_main.add_trace(
         go.Pie(
@@ -422,7 +469,7 @@ def create_advanced_charts(df, summary, I, N, currency_symbol="₺"):
             values=values,
             name="Fayda Dağılımı",
             hole=0.4,
-            marker_colors=["#2ca02c", "#ff7f0e", "#d62728", "#9467bd"],
+            marker_colors=marker_colors,
         ),
         row=2,
         col=2,
@@ -508,6 +555,13 @@ DEFAULT_PARAMS = {
     "opex_pm": 0.0,
     "amort_toggle": False,
     "amort_months": 36,
+    "use_advanced_ops": False,
+    "current_oee": 75.0,
+    "target_oee": 85.0,
+    "avg_unit_profit": 50.0,
+    "maintenance_cost_pm": 0.0,
+    "breakdown_risk_pct": 5.0,
+    "tech_obsolescence_annual": 0.0,
 }
 
 if "scenario_applied" not in st.session_state:
@@ -702,6 +756,91 @@ with st.sidebar:
         amort_months = int(amort_months)
         st.session_state["amort_months"] = amort_months
 
+        st.divider()
+
+        use_advanced_ops = st.checkbox(
+            "🔧 Gelişmiş Operasyon Analizi",
+            value=st.session_state.get("use_advanced_ops", False),
+            help="OEE artışı, kapasite genişleme ve otomasyon maliyetleri",
+        )
+        st.session_state["use_advanced_ops"] = use_advanced_ops
+
+        if use_advanced_ops:
+            st.subheader("🏭 Kapasite ve Verimlilik")
+
+            col_oee1, col_oee2 = st.columns(2)
+
+            with col_oee1:
+                current_oee = st.number_input(
+                    "Mevcut OEE (%)",
+                    min_value=10.0,
+                    max_value=100.0,
+                    value=st.session_state.get("current_oee", 75.0),
+                    step=1.0,
+                    help="Overall Equipment Effectiveness - mevcut durum",
+                )
+                st.session_state["current_oee"] = current_oee
+
+            with col_oee2:
+                target_oee = st.number_input(
+                    "Hedef OEE (%)",
+                    min_value=current_oee,
+                    max_value=100.0,
+                    value=max(st.session_state.get("target_oee", 85.0), current_oee),
+                    step=1.0,
+                    help="Otomasyon sonrası beklenen OEE",
+                )
+                st.session_state["target_oee"] = target_oee
+
+            avg_unit_profit = st.number_input(
+                f"Ortalama Birim Kar ({currency_symbol})",
+                min_value=0.0,
+                value=st.session_state.get("avg_unit_profit", 50.0),
+                step=5.0,
+                help="Ek üretilecek birimlerin ortalama kar marjı",
+            )
+            st.session_state["avg_unit_profit"] = avg_unit_profit
+
+            oee_improvement = target_oee - current_oee
+            capacity_multiplier = target_oee / current_oee if current_oee > 0 else 1.0
+
+            if oee_improvement > 0:
+                st.info(
+                    f"📈 OEE Artışı: +{oee_improvement:.1f}% → Kapasite çarpanı: {capacity_multiplier:.2f}x"
+                )
+            else:
+                st.info("📊 OEE artışı yok - sadece mevcut kapasiteyi korur")
+
+            st.subheader("⚙️ Otomasyon Maliyetleri")
+
+            maintenance_cost_pm = st.number_input(
+                f"Planlı Bakım Maliyeti (Aylık {currency_symbol})",
+                min_value=0.0,
+                value=st.session_state.get("maintenance_cost_pm", 0.0),
+                step=500.0,
+                help="Düzenli bakım, yedek parça, teknisyen maliyeti",
+            )
+            st.session_state["maintenance_cost_pm"] = maintenance_cost_pm
+
+            breakdown_risk_pct = st.number_input(
+                "Arıza Riski (%)",
+                min_value=0.0,
+                max_value=50.0,
+                value=st.session_state.get("breakdown_risk_pct", 5.0),
+                step=1.0,
+                help="Aylık arıza olasılığı - onarım maliyetleri için",
+            )
+            st.session_state["breakdown_risk_pct"] = breakdown_risk_pct
+
+            tech_obsolescence_annual = st.number_input(
+                f"Teknoloji Eskime Karşılığı (Yıllık {currency_symbol})",
+                min_value=0.0,
+                value=st.session_state.get("tech_obsolescence_annual", 0.0),
+                step=1_000.0,
+                help="Software güncelleme, teknoloji yenileme rezervi",
+            )
+            st.session_state["tech_obsolescence_annual"] = tech_obsolescence_annual
+
     st.subheader("Senaryolar")
     col_s1, col_s2, col_s3 = st.columns(3)
 
@@ -775,11 +914,40 @@ with st.sidebar:
             st.rerun()
 
     s_before_diff = s_before - s_after
+    additional_revenue_pm = 0.0
+    additional_costs_pm = 0.0
+
+    if st.session_state.get("use_advanced_ops", False):
+        current_oee_val = st.session_state.get("current_oee", 75.0)
+        target_oee_val = st.session_state.get("target_oee", 85.0)
+
+        if current_oee_val > 0:
+            capacity_improvement = (target_oee_val / current_oee_val) - 1.0
+
+            if capacity_improvement > 0:
+                additional_production = units_pm * capacity_improvement
+                additional_revenue_pm = additional_production * st.session_state.get(
+                    "avg_unit_profit", 50.0
+                )
+
+        monthly_tech_obsolescence = st.session_state.get("tech_obsolescence_annual", 0.0) / 12.0
+        expected_breakdown_cost = (I * 0.05) * (
+            st.session_state.get("breakdown_risk_pct", 5.0) / 100.0
+        )
+
+        additional_costs_pm = (
+            st.session_state.get("maintenance_cost_pm", 0.0)
+            + expected_breakdown_cost
+            + monthly_tech_obsolescence
+        )
+
     total_monthly_benefit = float(
         (E * C0)
         + (s_before_diff * units_pm * defect_cost)
         + (hours_saved_pm * hourly_rate)
         + (revenue_base_pm * uplift_pct)
+        + additional_revenue_pm
+        - additional_costs_pm
     )
 
     if total_monthly_benefit <= 0:
@@ -810,6 +978,13 @@ res = compute_series(
     revenue_base_pm=revenue_base_pm,
     uplift_pct=uplift_pct,
     opex_pm=opex_pm,
+    use_advanced_ops=st.session_state.get("use_advanced_ops", False),
+    current_oee=st.session_state.get("current_oee", 75.0),
+    target_oee=st.session_state.get("target_oee", 85.0),
+    avg_unit_profit=st.session_state.get("avg_unit_profit", 50.0),
+    maintenance_cost_pm=st.session_state.get("maintenance_cost_pm", 0.0),
+    breakdown_risk_pct=st.session_state.get("breakdown_risk_pct", 5.0),
+    tech_obsolescence_annual=st.session_state.get("tech_obsolescence_annual", 0.0),
 )
 
 df = res["df"]
@@ -1054,6 +1229,8 @@ with col_left:
         "Hurda/Hata Tasarrufu": lambda x: f"{x:,.0f} {currency_symbol}",
         "Zaman Tasarrufu": lambda x: f"{x:,.0f} {currency_symbol}",
         "Gelir Artışı": lambda x: f"{x:,.0f} {currency_symbol}",
+        "Kapasite Artışı": lambda x: f"{x:,.0f} {currency_symbol}",
+        "Otomasyon Maliyetleri": lambda x: f"{x:,.0f} {currency_symbol}",
     }
 
     styled_df = df.style.format(format_dict).applymap(
