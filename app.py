@@ -168,10 +168,24 @@ summary = res["summary"]
 
 # Layout
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("ROI (N ay) %", f"{summary['ROI (N ay) %']:.1f}")
-col2.metric("NPV", f"{summary['NPV']:,.0f} TL")
-col3.metric("Payback (ay)", summary['Payback (ay)'] if summary['Payback (ay)'] is not None else "—")
-col4.metric("FV Proje vs Alt", f"{summary['FV Proje'] - summary['FV Alternatif']:,.0f} TL")
+col1.metric(
+    "Yatırımın Geri Dönüş Süresi (ay)",
+    summary['Payback (ay)'] if summary['Payback (ay)'] is not None else "—",
+)
+col2.metric(
+    f"Yatırımın Toplam Getirisi ({N} ay)",
+    f"{summary['ROI (N ay) %']:.1f} %",
+)
+col3.metric(
+    f"Yatırımın Alternatif Getirisi ({N} ay)",
+    f"{summary['FV Alternatif']:,.0f} TL",
+)
+col4.metric(
+    "Projenin Gelecek Değeri",
+    f"{summary['FV Proje']:,.0f} TL",
+)
+
+st.metric("Net Bugünkü Değer (NPV)", f"{summary['NPV']:,.0f} TL")
 
 # Accounting view (amortization) card
 if 'amort_toggle' in locals() and amort_toggle:
@@ -197,4 +211,8 @@ st.dataframe(df.style.format({
     "Gelir Artışı": "{:,.0f}",
 }))
 
-st.caption("Notlar: ROI basit tanıma göre opex hariç hesaplanır. NPV nakit akışları ile aylık iskonto kullanır. Amortisman yalnızca muhasebe görünümünde bilgilendirme amaçlıdır.")
+st.caption(
+    "Notlar: Toplam Getiri (ROI), yatırımın N ay boyunca sağladığı indirimsiz toplam kazanç / yatırım tutarıdır. "
+    "Geri Dönüş Süresi, yatırımın kendini amorti ettiği ayı gösterir. ROI basit tanıma göre opex hariç hesaplanır. "
+    "NPV nakit akışları ile aylık iskonto kullanır. Amortisman yalnızca muhasebe görünümünde bilgilendirme amaçlıdır."
+)
