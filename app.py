@@ -926,7 +926,7 @@ with col3:
     )
 
 with col4:
-    difference = summary.get("FV Proje", 0.0) - summary.get("FV Alternatif", 0.0)
+    difference = summary.get("Toplam Aylık Fayda", 0.0) - summary.get("FV Alternatif", 0.0)
     diff_icon, diff_color = get_metric_color_and_icon("difference", difference)
     difference_text, _ = format_safe_metric(difference, "currency", currency_symbol)
 
